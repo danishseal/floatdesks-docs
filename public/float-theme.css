@@ -1,0 +1,460 @@
+/* Use the exact scraped Mintlify structural layer that styles the local home page. */
+@import url("/mintlify-assets/_next/static/chunks/462bacc63bed9960.css?dpl=dpl_6Y5n2Y58MHyPukqfbwYtVdV6GiaE");
+@import url("/mintlify-assets/_next/static/chunks/91d23aa3a06b5db4.css?dpl=dpl_6Y5n2Y58MHyPukqfbwYtVdV6GiaE");
+
+/* Float documentation theme — shared visual language with float-web. */
+:root {
+  --pixel-frame-inset: clamp(12px, 1.25vw, 18px);
+  --float-cream: #eee9dd;
+  --float-cream-deep: #e7e1d2;
+  --float-ink: #1a1a1a;
+  --float-ink-muted: #4a4a44;
+  --float-line-soft: rgb(26 26 26 / 18%);
+  --float-blue: #2563eb;
+  --float-code: #24231f;
+  --float-code-ink: #f5f0e4;
+  --primary: 37 99 235;
+  --primary-light: 37 99 235;
+  --primary-dark: 37 99 235;
+  --background-light: 238 233 221;
+  --background-dark: 238 233 221;
+  --gray-50: 231 225 210;
+  --gray-100: 226 219 203;
+  --gray-200: 204 198 185;
+  --gray-300: 175 170 159;
+  --gray-400: 109 107 100;
+  --gray-500: 74 74 68;
+  --gray-600: 61 61 57;
+  --gray-700: 48 48 45;
+  --gray-800: 34 34 32;
+  --gray-900: 26 26 26;
+  --gray-950: 20 20 20;
+  color-scheme: light;
+}
+
+html,
+html.dark {
+  background: transparent !important;
+  color-scheme: light !important;
+  width: 100%;
+  height: 100%;
+  overflow: hidden !important;
+}
+
+html body,
+html.dark body {
+  background: transparent !important;
+  color: var(--float-ink) !important;
+  font-family: "PPNeueMontreal", ui-sans-serif, system-ui, sans-serif !important;
+  letter-spacing: 0 !important;
+  width: 100%;
+  height: 100%;
+  overflow: hidden !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Launchpad PixelFrame + AppShell geometry. */
+:root:root:root body > div.relative.antialiased {
+  position: fixed !important;
+  inset: var(--pixel-frame-inset) !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  grid-template-rows: auto minmax(0, 1fr) !important;
+  gap: var(--pixel-frame-inset) !important;
+  width: auto !important;
+  height: auto !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+
+:root:root:root #navbar {
+  position: fixed !important;
+  inset: var(--pixel-frame-inset) var(--pixel-frame-inset) auto !important;
+  width: auto !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+  background: var(--float-cream) !important;
+  border: 1px solid var(--float-ink) !important;
+  grid-row: 1 !important;
+}
+
+:root:root:root #navbar + div {
+  position: fixed !important;
+  inset:
+    calc(
+      var(--pixel-frame-inset) +
+      var(--mintlify-slot-header-height, calc(4rem + var(--topbar-tabs-height, 0rem))) +
+      var(--pixel-frame-inset)
+    )
+    var(--pixel-frame-inset)
+    var(--pixel-frame-inset) !important;
+  display: flex !important;
+  width: auto !important;
+  height: auto !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  background: var(--float-cream) !important;
+  border: 1px solid var(--float-ink) !important;
+  grid-row: auto !important;
+  align-self: auto !important;
+}
+
+:root:root:root #navbar + div > nav {
+  display: none !important;
+  position: absolute !important;
+  inset: 0 auto 0 0 !important;
+  z-index: 20 !important;
+  width: 18rem !important;
+  height: auto !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  background: var(--float-cream) !important;
+}
+
+:root:root:root #docs-static-sidebar {
+  position: absolute !important;
+  inset: 0 auto 0 0 !important;
+  z-index: 20 !important;
+  display: block !important;
+  width: 18rem !important;
+  padding: 1rem 1.25rem 2rem !important;
+  overflow: hidden !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  background: var(--float-cream) !important;
+  border-right: 1px solid var(--float-line-soft) !important;
+}
+
+:root:root:root #docs-static-sidebar #navigation-items {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+:root:root:root #sidebar-content {
+  display: block !important;
+  position: absolute !important;
+  inset: 0 !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+:root:root:root #sidebar-content [data-component-part="scroll-area-viewport"] {
+  overflow: hidden !important;
+}
+
+/* Ported from Float's #main-content scrollbar rules. */
+:root:root:root #content-container {
+  position: absolute !important;
+  inset: 0 0 0 18rem !important;
+  width: auto !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  max-height: 100% !important;
+  height: auto !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  padding-right: 0.5rem !important;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+}
+
+:root:root:root #content-container::-webkit-scrollbar-track {
+  display: none;
+}
+
+:root:root:root #content-container::-webkit-scrollbar {
+  display: none;
+}
+
+:root:root:root .pixel-frame__scrollbar {
+  position: absolute;
+  inset: 0 0 0 auto;
+  z-index: 50;
+  width: 0.5rem;
+  border: 0.0625rem solid #000;
+  border-radius: 0 !important;
+  background-color: #fff;
+  cursor: pointer;
+  touch-action: none;
+}
+
+:root:root:root .pixel-frame__scrollbar-thumb {
+  position: absolute;
+  inset: 0 0 auto;
+  height: clamp(3rem, 14vh, 7rem);
+  border-radius: 0 !important;
+  background-color: #000;
+  will-change: transform;
+}
+
+html #background-color,
+html.dark #background-color,
+html [class*="bg-background"],
+html.dark [class*="bg-background"] {
+  background-color: var(--float-cream) !important;
+}
+
+html #background-color,
+html.dark #background-color {
+  background: transparent !important;
+}
+
+html #navbar,
+html [id="navbar-transition"],
+html.dark #navbar,
+html.dark [id="navbar-transition"] {
+  background: rgb(238 233 221 / 96%) !important;
+  border-color: var(--float-ink) !important;
+  backdrop-filter: blur(12px);
+}
+
+:root:root:root #navbar :where(a, button, span, svg),
+:root:root:root.dark #navbar :where(a, button, span, svg) {
+  color: var(--float-ink) !important;
+}
+
+:root:root:root #navbar #topbar-cta-button :where(span, svg),
+:root:root:root.dark #navbar #topbar-cta-button :where(span, svg) {
+  color: var(--float-cream) !important;
+}
+
+:root:root:root #navbar #topbar-cta-button a,
+:root:root:root.dark #navbar #topbar-cta-button a {
+  background: var(--float-ink) !important;
+  border: 1px solid var(--float-ink) !important;
+}
+
+html #sidebar,
+html.dark #sidebar {
+  background: var(--float-cream) !important;
+  border-color: var(--float-ink) !important;
+}
+
+/* Mintlify adds a sticky scroll fade above the first sidebar group. */
+html #sidebar .bg-linear-to-b,
+html.dark #sidebar .bg-linear-to-b {
+  display: none !important;
+}
+
+html body :where(p, li, dd),
+html.dark body :where(p, li, dd) {
+  color: var(--float-ink-muted);
+}
+
+html body :where(h1, h2, h3, h4, h5, h6),
+html.dark body :where(h1, h2, h3, h4, h5, h6) {
+  color: var(--float-ink) !important;
+  text-wrap: balance;
+}
+
+html body h1,
+html.dark body h1 {
+  font-family: "NeueBit", "PPNeueMontrealMono", monospace !important;
+  font-size: clamp(3.25rem, 8vw, 5rem) !important;
+  line-height: 0.88 !important;
+  letter-spacing: 0.01em !important;
+}
+
+html body :where(h2, h3, h4, h5, h6),
+html.dark body :where(h2, h3, h4, h5, h6) {
+  font-family: "PPNeueMontrealMono", ui-monospace, monospace !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.04em !important;
+  line-height: 1.15 !important;
+  text-transform: uppercase;
+}
+
+html body article > p,
+html.dark body article > p {
+  max-width: 68ch;
+  line-height: 1.6;
+  text-wrap: pretty;
+}
+
+html body :where(a, button),
+html.dark body :where(a, button) {
+  text-decoration-thickness: from-font;
+  text-underline-position: from-font;
+}
+
+html body a:not(.nav-logo):not([class*="card"]),
+html.dark body a:not(.nav-logo):not([class*="card"]) {
+  text-decoration-color: rgb(37 99 235 / 40%);
+  text-underline-offset: 0.18em;
+}
+
+html body a:not(.nav-logo):hover,
+html.dark body a:not(.nav-logo):hover,
+html .nav-anchor[aria-current="page"],
+html.dark .nav-anchor[aria-current="page"] {
+  color: var(--float-blue) !important;
+}
+
+html .nav-anchor,
+html.dark .nav-anchor {
+  font-family: "PPNeueMontrealMono", ui-monospace, monospace !important;
+  letter-spacing: 0.015em;
+}
+
+html #search-bar-entry,
+html.dark #search-bar-entry {
+  background: var(--float-cream-deep) !important;
+  border: 1px solid var(--float-ink) !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  color: var(--float-ink-muted) !important;
+}
+
+html body :where(.card, [class*="rounded-xl"], [class*="rounded-2xl"]),
+html.dark body :where(.card, [class*="rounded-xl"], [class*="rounded-2xl"]) {
+  border-color: var(--float-ink) !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+:root:root:root body .card,
+:root:root:root.dark body .card {
+  background: var(--float-cream-deep) !important;
+  border: 1px solid var(--float-ink) !important;
+  color: var(--float-ink) !important;
+  transition: background-color 140ms ease, border-color 140ms ease;
+}
+
+:root:root:root body .card :where(h2, h3, p, span, svg),
+:root:root:root.dark body .card :where(h2, h3, p, span, svg) {
+  color: var(--float-ink) !important;
+}
+
+:root:root:root body .card p,
+:root:root:root.dark body .card p {
+  color: var(--float-ink-muted) !important;
+}
+
+:root:root:root body .card:hover,
+:root:root:root.dark body .card:hover {
+  background: var(--float-cream) !important;
+  border-color: var(--float-blue) !important;
+}
+
+:root:root:root body .card:hover :where(h2, h3),
+:root:root:root.dark body .card:hover :where(h2, h3) {
+  color: var(--float-blue) !important;
+}
+
+html body :where(button, [role="button"]):focus-visible,
+html body a:focus-visible {
+  outline: 2px solid var(--float-blue) !important;
+  outline-offset: 3px !important;
+}
+
+html body :where(code, kbd, pre, samp),
+html.dark body :where(code, kbd, pre, samp) {
+  font-family: "BerkeleyMono", ui-monospace, "SFMono-Regular", monospace !important;
+  font-variant-ligatures: none;
+}
+
+html body pre,
+html.dark body pre,
+html body [data-component-part="code-block-root"],
+html.dark body [data-component-part="code-block-root"] {
+  background: var(--float-code) !important;
+  border: 1px solid var(--float-ink) !important;
+  border-radius: 0 !important;
+  color: var(--float-code-ink) !important;
+  box-shadow: none !important;
+}
+
+html body :not(pre) > code,
+html.dark body :not(pre) > code {
+  background: var(--float-cream-deep) !important;
+  border: 1px solid var(--float-line-soft);
+  color: var(--float-ink) !important;
+}
+
+html body :where(table, blockquote),
+html.dark body :where(table, blockquote) {
+  border-color: var(--float-ink) !important;
+}
+
+html body th,
+html.dark body th {
+  background: var(--float-ink) !important;
+  color: var(--float-cream) !important;
+  font-family: "PPNeueMontrealMono", ui-monospace, monospace !important;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+html body td,
+html.dark body td {
+  border-color: var(--float-line-soft) !important;
+  color: var(--float-ink-muted) !important;
+}
+
+html body [data-callout-type],
+html.dark body [data-callout-type] {
+  background: var(--float-cream-deep) !important;
+  border-color: var(--float-ink) !important;
+  color: var(--float-ink) !important;
+}
+
+html body [data-callout-type] :where([data-component-part="callout-content"], svg),
+html.dark body [data-callout-type] :where([data-component-part="callout-content"], svg) {
+  color: var(--float-ink) !important;
+}
+
+html body ::selection {
+  background: var(--float-blue);
+  color: #fff;
+}
+
+html footer#footer,
+html.dark footer#footer {
+  background: var(--float-ink) !important;
+  border-top: 1px solid var(--float-ink) !important;
+}
+
+html footer#footer *,
+html.dark footer#footer * {
+  color: var(--float-cream) !important;
+}
+
+@media (max-width: 640px) {
+  :root {
+    --pixel-frame-inset: 8px;
+  }
+
+  html #search-bar-entry,
+  html.dark #search-bar-entry {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 1023px) {
+  :root:root:root #sidebar,
+  :root:root:root #docs-static-sidebar {
+    display: none !important;
+  }
+
+  :root:root:root #content-container {
+    inset-inline-start: 0 !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html *,
+  html *::before,
+  html *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
