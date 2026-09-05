@@ -104,6 +104,62 @@
   height: 100%;
 }
 
+#float-docs-header-tabs-root {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+.float-header-tabs {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2.5rem;
+  font-family: "PPNeueMontrealMono", ui-monospace, monospace;
+  font-size: .75rem;
+  color: var(--float-ink);
+}
+.float-header-tabs > a {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: .75rem;
+  color: var(--float-ink) !important;
+  text-decoration: none !important;
+  white-space: nowrap;
+}
+.float-header-tab__key {
+  display: flex;
+  width: 1.25rem;
+  height: 1.25rem;
+  align-items: center;
+  justify-content: center;
+  font-size: .6875rem;
+  font-weight: 500;
+}
+.hover-effect {
+  position: relative;
+  font-kerning: none;
+  white-space: nowrap;
+}
+.hover-effect--cursor-square span {
+  position: relative;
+  --opa: 0;
+}
+.hover-effect--cursor-square span::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1ch;
+  height: 100%;
+  opacity: var(--opa);
+  background: currentColor;
+}
+@media (max-width: 1023px) {
+  #float-docs-header-tabs-root { display: none; }
+}
+
 /* The opening statement of the whole document: what the argument is, and what
    changed since it was published. It reads as ordinary body copy where it is
    the frame for everything below it, so it gets a surface of its own. Built
@@ -209,3 +265,125 @@
 .grid-wide table { font-size: 12px; }
 .grid-wide td:nth-child(5),
 .grid-wide td:nth-child(6) { white-space: nowrap; }
+
+/* Two-part footer ported from float-web: information panel, then particle field. */
+#float-docs-footer-root {
+  position: relative;
+  z-index: 30;
+  width: 100%;
+}
+.float-footer {
+  position: relative;
+  width: 100%;
+  min-height: 100%;
+  color: #fff;
+  background: #000;
+}
+.float-footer__container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 4.5rem;
+  padding: 3.125rem 1rem 2.5rem;
+  background: #000;
+}
+.float-footer__logo {
+  display: inline-flex;
+  width: fit-content;
+}
+.float-footer__logo img {
+  width: 6.25rem;
+  height: auto;
+  transform: translateX(-31.6667%);
+}
+.float-footer__bottom {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3rem;
+}
+.float-footer__navigation,
+.float-footer__copyright {
+  font-family: "PPNeueMontrealMono", ui-monospace, monospace;
+}
+.float-footer .float-footer__navigation li {
+  color: #fff !important;
+  font-size: .75rem;
+  line-height: 1rem;
+}
+.float-footer__navigation a,
+.float-footer__navigation li > span {
+  display: inline-block;
+  padding: .25rem 0;
+  color: #fff !important;
+  text-decoration: none !important;
+}
+.float-footer .float-footer__navigation a:hover,
+.float-footer .float-footer__social-list a:hover {
+  color: #fff !important;
+  opacity: .68;
+}
+.float-footer .float-footer__navigation a:focus-visible,
+.float-footer .float-footer__social-list a:focus-visible,
+.float-footer .float-footer__logo:focus-visible {
+  outline: 2px solid #fff !important;
+  outline-offset: 3px !important;
+}
+.float-footer__social-list {
+  display: flex;
+  align-items: center;
+  gap: 1.5625rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.float-footer__social-list a,
+.float-footer__social-list span {
+  display: flex;
+  color: #fff !important;
+  transition: opacity 150ms ease;
+}
+.float-footer__social-list svg {
+  width: auto;
+  height: 1.5rem;
+}
+.float-footer__copyright {
+  max-width: 22ch;
+  color: #fff !important;
+  font-size: .875rem;
+  line-height: normal;
+}
+.float-footer__animation {
+  width: 100%;
+  height: 50svh;
+  min-height: 20rem;
+  background: #000;
+}
+.float-footer__animation canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+}
+@media (min-width: 768px) {
+  .float-footer__container { padding-inline: 2rem; }
+  .float-footer__logo img { width: 9.375rem; }
+}
+@media (min-width: 1024px) {
+  .float-footer__container { gap: 7rem; padding-right: 2rem; }
+  .float-footer__bottom {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    align-items: end;
+    gap: 1rem;
+  }
+}
+@media (min-width: 1280px) {
+  .float-footer {
+    display: flex;
+    height: calc(100svh - 6rem);
+    flex-direction: column;
+  }
+  .float-footer__animation { height: 100%; min-height: 0; flex-grow: 1; }
+}

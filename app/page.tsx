@@ -1,9 +1,12 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { BackgroundSquares } from "./components/background-squares";
+import { Footer } from "./components/footer";
+import { HeaderTabs } from "./components/header-tabs";
 
-const MIRROR_VERSION = "float-v2-groups-1";
+const MIRROR_VERSION = "float-v2-header-tabs-1";
 
 /**
  * Move to a heading, visibly, and always arrive.
@@ -78,10 +81,48 @@ function getMirrorUrl(pathname: string, hash = "") {
   return `/mirror${normalizedPath}?v=${MIRROR_VERSION}${hash}`;
 }
 
-function applyFloatTheme(frame: HTMLIFrameElement) {
+function ensureFooterHost(doc: Document) {
+  const content = doc.querySelector<HTMLElement>("#content-container");
+  if (!content) return null;
+
+  let host = content.querySelector<HTMLElement>("#float-docs-footer-root");
+  if (!host) {
+    host = doc.createElement("div");
+    host.id = "float-docs-footer-root";
+    content.appendChild(host);
+  }
+  return host;
+}
+
+function ensureHeaderTabsHost(doc: Document) {
+  const header = doc.querySelector<HTMLElement>("#navbar");
+  if (!header) return null;
+
+  let host = header.querySelector<HTMLElement>("#float-docs-header-tabs-root");
+  if (!host) {
+    host = doc.createElement("div");
+    host.id = "float-docs-header-tabs-root";
+    header.appendChild(host);
+  }
+  return host;
+}
+
+function applyFloatTheme(
+  frame: HTMLIFrameElement,
+  setFooterHost: (host: HTMLElement) => void,
+  setHeaderTabsHost: (host: HTMLElement) => void,
+) {
   const doc = frame.contentDocument;
 
-  if (!doc || !doc.querySelector("#content-container") || doc.documentElement.dataset.floatInitialized) {
+  if (!doc || !doc.querySelector("#content-container")) {
+    return;
+  }
+
+  if (doc.documentElement.dataset.floatInitialized) {
+    const host = ensureFooterHost(doc);
+    if (host) setFooterHost(host);
+    const headerHost = ensureHeaderTabsHost(doc);
+    if (headerHost) setHeaderTabsHost(headerHost);
     return;
   }
 
@@ -104,9 +145,12 @@ function applyFloatTheme(frame: HTMLIFrameElement) {
         const nextContent = nextDoc.querySelector<HTMLElement>("#content-container");
         if (!nextContent) throw new Error("Documentation content was not found");
 
+        const footerHost = ensureFooterHost(doc);
         currentContent.replaceChildren(
           ...Array.from(nextContent.childNodes, (node) => doc.importNode(node, true)),
+          ...(footerHost ? [footerHost] : []),
         );
+        if (footerHost) setFooterHost(footerHost);
         currentContent.scrollTop = 0;
         doc.title = nextDoc.title;
 
@@ -190,6 +234,11 @@ function applyFloatTheme(frame: HTMLIFrameElement) {
   if (!scrollWindow || !bodyFrame) {
     return;
   }
+
+  const footerHost = ensureFooterHost(doc);
+  if (footerHost) setFooterHost(footerHost);
+  const headerTabsHost = ensureHeaderTabsHost(doc);
+  if (headerTabsHost) setHeaderTabsHost(headerTabsHost);
 
   /**
    * Expand and collapse the sidebar sections instead of cutting to them.
@@ -393,12 +442,14 @@ export function DocsMirror({
   src?: string;
 }) {
   const frameRef = useRef<HTMLIFrameElement>(null);
+  const [footerHost, setFooterHost] = useState<HTMLElement | null>(null);
+  const [headerTabsHost, setHeaderTabsHost] = useState<HTMLElement | null>(null);
 
   useEffect(() => {
     // Cached iframe documents can finish loading before React attaches onLoad.
     const frame = frameRef.current;
     if (frame?.contentDocument?.readyState === "complete") {
-      applyFloatTheme(frame);
+      applyFloatTheme(frame, setFooterHost, setHeaderTabsHost);
     }
   }, [src]);
 
@@ -412,8 +463,12 @@ export function DocsMirror({
         className="mirror-frame"
         src={src}
         title="Float documentation"
-        onLoad={(event) => applyFloatTheme(event.currentTarget)}
+        onLoad={(event) =>
+          applyFloatTheme(event.currentTarget, setFooterHost, setHeaderTabsHost)
+        }
       />
+      {headerTabsHost ? createPortal(<HeaderTabs />, headerTabsHost) : null}
+      {footerHost ? createPortal(<Footer />, footerHost) : null}
     </main>
   );
 }

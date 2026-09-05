@@ -7,5 +7,5 @@ export default async function DocsPage({
 }) {
   const { slug } = await params;
   const path = slug.map(encodeURIComponent).join("/");
-  return <DocsMirror src={`/mirror/${path}?v=float-v2-groups-1`} />;
+  return <DocsMirror src={`/mirror/${path}?v=float-v2-header-tabs-1`} />;
 }
