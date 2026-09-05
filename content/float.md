@@ -1335,7 +1335,7 @@ this size and must not survive past it.
 | | |
 |---|---|
 | Registry | `0x7134d98596490838FC16e8CA16bC2FDd57aD3202` |
-| OracleHub | `0x4a6a7692876c23D5B5daafC447bc63fe96281905` |
+| OracleHub (median) | `0x11BeB700b526b0487382071A7910dF81a4cE658c` |
 | Desk | `0x09E2643442ce37cBf3Fea57309657e42F82439C9` |
 | Listings | `0xC960De8888EaC33Bc4a2Cc2eB0A2DD839cd6Fb42` |
 | ReserveBook | `0x3A4c63B17292d352879dF8AF662432E8Ed767951` |
@@ -1382,7 +1382,10 @@ No softening. This is the list.
    Float is; everything else here is smaller.
 2. **One key owns all of it**, the breaker included, and it is also the sole
    oracle poster and the ReserveBook custodian. Fine for a run of this size,
-   unacceptable past it.
+   unacceptable past it. The oracle half of this is now one step less bad: the
+   median hub is deployed and live, so a second and third poster can be added
+   without touching any other contract. Until they are, `posterCount` is 1 and
+   a median over one poster is that poster.
 3. **Nobody outside has taken either side of the cap market.** The mechanism
    works and has been exercised end to end with real money, by the deployer.
 4. **Backers are pari passu with the global LP**, and their directional exposure
@@ -1421,7 +1424,7 @@ No softening. This is the list.
 | the backing, which is the product | `contracts/src/ReserveBook.sol`, then `services/keepers/reserve-keeper.mjs` |
 | the dealer | `contracts/src/Desk.sol` |
 | what a listing is | `contracts/src/Listings.sol`, `UAsset.sol` |
-| price and failure | `contracts/src/OracleHub.sol`, `Breaker.sol` |
+| price and failure | `contracts/src/OracleHubMedian.sol`, `Breaker.sol` |
 | the launch | `contracts/src/CurveFunder.sol`, `Graduator.sol`, `RangeSeeder.sol` |
 | funding and the cap market | `contracts/src/VaultFunder.sol`, `BackingVault.sol`, `StakeVaults.sol` |
 | everything wired together | `contracts/script/DeployCurve.s.sol` |
