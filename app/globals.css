@@ -22,12 +22,8 @@ body {
   width: 100%;
   border: 0;
   background: transparent;
-  opacity: 0;
 }
 
-.mirror-frame[data-ready="true"] {
-  opacity: 1;
-}
 
 .pixel-blast {
   position: absolute;

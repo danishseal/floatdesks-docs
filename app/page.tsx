@@ -1,9 +1,9 @@
 "use client";
 
-import type { SyntheticEvent } from "react";
+import { useEffect, useRef } from "react";
 import { BackgroundSquares } from "./components/background-squares";
 
-const MIRROR_VERSION = "launchpad-shell-5";
+const MIRROR_VERSION = "float-v2-groups-1";
 
 function getMirrorUrl(pathname: string, hash = "") {
   let normalizedPath = pathname;
@@ -19,19 +19,20 @@ function getMirrorUrl(pathname: string, hash = "") {
   return `/mirror${normalizedPath}?v=${MIRROR_VERSION}${hash}`;
 }
 
-function applyFloatTheme(event: SyntheticEvent<HTMLIFrameElement>) {
-  const frame = event.currentTarget;
-  const doc = event.currentTarget.contentDocument;
+function applyFloatTheme(frame: HTMLIFrameElement) {
+  const doc = frame.contentDocument;
 
-  if (!doc) {
+  if (!doc || !doc.querySelector("#content-container") || doc.documentElement.dataset.floatInitialized) {
     return;
   }
 
+  doc.documentElement.dataset.floatInitialized = "true";
   frame.dataset.ready = "true";
+  document.title = doc.title;
 
   if (!doc.documentElement.dataset.localNavigation) {
     doc.documentElement.dataset.localNavigation = "true";
-    const navigate = async (url: URL) => {
+    const navigate = async (url: URL, pushHistory = true) => {
       const currentContent = doc.querySelector<HTMLElement>("#content-container");
       if (!currentContent) return;
 
@@ -57,10 +58,18 @@ function applyFloatTheme(event: SyntheticEvent<HTMLIFrameElement>) {
           "#docs-static-sidebar #navigation-items",
         );
         if (nextNavigation && staticNavigation) {
+          const expandedGroups = new Set(
+            Array.from(staticNavigation.querySelectorAll<HTMLDetailsElement>("details[open]"), (group) => group.dataset.group),
+          );
+          for (const group of nextNavigation.querySelectorAll<HTMLDetailsElement>("details[data-group]")) {
+            group.open = expandedGroups.has(group.dataset.group);
+          }
           staticNavigation.replaceWith(doc.importNode(nextNavigation, true));
         }
 
-        frame.contentWindow?.history.pushState({}, "", getMirrorUrl(url.pathname, url.hash));
+        if (pushHistory) frame.contentWindow?.history.pushState({}, "", getMirrorUrl(url.pathname, url.hash));
+        document.title = nextDoc.title;
+        doc.querySelector<HTMLDetailsElement>(".mobile-navigation")?.removeAttribute("open");
         if (url.hash) {
           doc.getElementById(decodeURIComponent(url.hash.slice(1)))?.scrollIntoView({
             block: "start",
@@ -73,7 +82,12 @@ function applyFloatTheme(event: SyntheticEvent<HTMLIFrameElement>) {
       }
     };
 
+    frame.contentWindow?.addEventListener("popstate", () => {
+      void navigate(new URL(frame.contentWindow!.location.href), false);
+    });
+
     doc.addEventListener("click", (clickEvent) => {
+      if (clickEvent.button !== 0 || clickEvent.metaKey || clickEvent.ctrlKey || clickEvent.shiftKey || clickEvent.altKey) return;
       const target = clickEvent.target;
       const FrameElement = doc.defaultView?.Element;
       if (!FrameElement || !(target instanceof FrameElement)) return;
@@ -139,69 +153,74 @@ function applyFloatTheme(event: SyntheticEvent<HTMLIFrameElement>) {
   requestAnimationFrame(pinSidebar);
   window.setTimeout(pinSidebar, 250);
 
-  if (bodyFrame.querySelector(".pixel-frame__scrollbar")) {
-    return;
+  const staticSidebar = doc.querySelector<HTMLElement>("#docs-static-sidebar");
+  const targets = [scrollWindow, ...(staticSidebar ? [staticSidebar] : [])];
+  for (const scrollWindow of targets) {
+    const sidebarTrack = scrollWindow === staticSidebar;
+    const trackId = sidebarTrack ? "sidebar-scrollbar" : "content-scrollbar";
+    if (doc.getElementById(trackId)) continue;
+    const scrollbar = doc.createElement("div");
+    scrollbar.className = `pixel-frame__scrollbar ${sidebarTrack ? "pixel-frame__scrollbar--sidebar" : ""}`;
+    scrollbar.id = trackId;
+    scrollbar.setAttribute("aria-hidden", "true");
+    const thumb = doc.createElement("div");
+    thumb.className = "pixel-frame__scrollbar-thumb";
+    scrollbar.appendChild(thumb);
+    bodyFrame.appendChild(scrollbar);
+  
+    const syncScrollbar = () => {
+      const maxScroll = scrollWindow.scrollHeight - scrollWindow.clientHeight;
+      const travel = scrollbar.clientHeight - thumb.offsetHeight;
+      const progress = maxScroll > 0 ? scrollWindow.scrollTop / maxScroll : 0;
+      scrollbar.hidden = maxScroll <= 0;
+      thumb.style.transform = `translateY(${Math.max(0, progress * travel)}px)`;
+    };
+  
+    let dragOffset = 0;
+    let dragging = false;
+    const scrollFromPointer = (pointerEvent: PointerEvent) => {
+      const track = scrollbar.getBoundingClientRect();
+      const maxScroll = scrollWindow.scrollHeight - scrollWindow.clientHeight;
+      const travel = scrollbar.clientHeight - thumb.offsetHeight;
+      if (travel <= 0 || maxScroll <= 0) return;
+      const thumbTop = Math.max(
+        0,
+        Math.min(travel, pointerEvent.clientY - track.top - 1 - dragOffset),
+      );
+      scrollWindow.scrollTop = (thumbTop / travel) * maxScroll;
+    };
+  
+    scrollbar.addEventListener("pointerdown", (pointerEvent) => {
+      const bounds = thumb.getBoundingClientRect();
+      const onThumb = pointerEvent.clientY >= bounds.top && pointerEvent.clientY <= bounds.bottom;
+      dragOffset = onThumb ? pointerEvent.clientY - bounds.top : thumb.offsetHeight / 2;
+      dragging = true;
+      scrollbar.setPointerCapture(pointerEvent.pointerId);
+      scrollFromPointer(pointerEvent);
+    });
+    scrollbar.addEventListener("pointermove", (pointerEvent) => {
+      if (dragging) scrollFromPointer(pointerEvent);
+    });
+    const stopDragging = (pointerEvent: PointerEvent) => {
+      dragging = false;
+      if (scrollbar.hasPointerCapture(pointerEvent.pointerId)) {
+        scrollbar.releasePointerCapture(pointerEvent.pointerId);
+      }
+    };
+    scrollbar.addEventListener("pointerup", stopDragging);
+    scrollbar.addEventListener("pointercancel", stopDragging);
+    scrollWindow.addEventListener("scroll", syncScrollbar, { passive: true });
+    scrollWindow.addEventListener("toggle", syncScrollbar, true);
+  
+    const resizeObserver = new ResizeObserver(syncScrollbar);
+    resizeObserver.observe(scrollWindow);
+    for (const child of scrollWindow.children) resizeObserver.observe(child);
+    new MutationObserver(syncScrollbar).observe(scrollWindow, {
+      childList: true,
+      subtree: true,
+    });
+    syncScrollbar();
   }
-
-  const scrollbar = doc.createElement("div");
-  scrollbar.className = "pixel-frame__scrollbar";
-  scrollbar.setAttribute("aria-hidden", "true");
-  const thumb = doc.createElement("div");
-  thumb.className = "pixel-frame__scrollbar-thumb";
-  scrollbar.appendChild(thumb);
-  bodyFrame.appendChild(scrollbar);
-
-  const syncScrollbar = () => {
-    const maxScroll = scrollWindow.scrollHeight - scrollWindow.clientHeight;
-    const travel = scrollbar.clientHeight - thumb.offsetHeight;
-    const progress = maxScroll > 0 ? scrollWindow.scrollTop / maxScroll : 0;
-    scrollbar.hidden = maxScroll <= 0;
-    thumb.style.transform = `translateY(${Math.max(0, progress * travel)}px)`;
-  };
-
-  let dragOffset = 0;
-  let dragging = false;
-  const scrollFromPointer = (pointerEvent: PointerEvent) => {
-    const track = scrollbar.getBoundingClientRect();
-    const maxScroll = scrollWindow.scrollHeight - scrollWindow.clientHeight;
-    const travel = scrollbar.clientHeight - thumb.offsetHeight;
-    if (travel <= 0 || maxScroll <= 0) return;
-    const thumbTop = Math.max(
-      0,
-      Math.min(travel, pointerEvent.clientY - track.top - 1 - dragOffset),
-    );
-    scrollWindow.scrollTop = (thumbTop / travel) * maxScroll;
-  };
-
-  scrollbar.addEventListener("pointerdown", (pointerEvent) => {
-    const bounds = thumb.getBoundingClientRect();
-    const onThumb = pointerEvent.clientY >= bounds.top && pointerEvent.clientY <= bounds.bottom;
-    dragOffset = onThumb ? pointerEvent.clientY - bounds.top : thumb.offsetHeight / 2;
-    dragging = true;
-    scrollbar.setPointerCapture(pointerEvent.pointerId);
-    scrollFromPointer(pointerEvent);
-  });
-  scrollbar.addEventListener("pointermove", (pointerEvent) => {
-    if (dragging) scrollFromPointer(pointerEvent);
-  });
-  const stopDragging = (pointerEvent: PointerEvent) => {
-    dragging = false;
-    if (scrollbar.hasPointerCapture(pointerEvent.pointerId)) {
-      scrollbar.releasePointerCapture(pointerEvent.pointerId);
-    }
-  };
-  scrollbar.addEventListener("pointerup", stopDragging);
-  scrollbar.addEventListener("pointercancel", stopDragging);
-  scrollWindow.addEventListener("scroll", syncScrollbar, { passive: true });
-
-  const resizeObserver = new ResizeObserver(syncScrollbar);
-  resizeObserver.observe(scrollWindow);
-  for (const child of scrollWindow.children) resizeObserver.observe(child);
-  new MutationObserver(syncScrollbar).observe(scrollWindow, {
-    childList: true,
-    subtree: true,
-  });
-  syncScrollbar();
 }
 
 export function DocsMirror({
@@ -209,16 +228,27 @@ export function DocsMirror({
 }: {
   src?: string;
 }) {
+  const frameRef = useRef<HTMLIFrameElement>(null);
+
+  useEffect(() => {
+    // Cached iframe documents can finish loading before React attaches onLoad.
+    const frame = frameRef.current;
+    if (frame?.contentDocument?.readyState === "complete") {
+      applyFloatTheme(frame);
+    }
+  }, [src]);
+
   return (
     <main className="mirror-shell">
       <div className="pixel-blast" aria-hidden="true">
         <BackgroundSquares />
       </div>
       <iframe
+        ref={frameRef}
         className="mirror-frame"
         src={src}
-        title="dottxt documentation"
-        onLoad={applyFloatTheme}
+        title="Float documentation"
+        onLoad={(event) => applyFloatTheme(event.currentTarget)}
       />
     </main>
   );

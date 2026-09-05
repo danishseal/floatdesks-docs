@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Start Here - dottxt docs",
-  description: "Pick the fastest path based on what you need right now.",
+  title: "Float Docs",
+  icons: { icon: { url: "/sailboat-white-300_1_1.png", type: "image/png" } },
+  description: "Float 2.0 documentation: backing, custody, markets, liquidity, fees, and risk.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
