@@ -185,3 +185,27 @@
 .nav-plus::before { transform: translateY(-50%); }
 .nav-plus::after { transform: translateY(-50%) rotate(90deg); }
 .nav-section[open] .nav-plus::after { transform: translateY(-50%) rotate(0deg); }
+
+/* The genesis grid is seven columns and one of them is a 42 character address.
+   The default cell rules put a 130px floor under every column and 12px of
+   padding on each side, which alone reserves more width than the article has,
+   so the token column ran off the edge and the address broke into a stack of
+   chips inside its cell. Both are the same fix: let the columns be as narrow as
+   their content and stop the address wrapping, since an address split across
+   four lines cannot be read or copied, which is the only reason it is there. */
+.grid-wide table { font-size: 12.5px; margin: 24px 0; }
+.grid-wide th,
+.grid-wide td { padding: 7px 9px; min-width: 0; }
+.grid-wide td code {
+  white-space: nowrap;
+  overflow-wrap: normal;
+  font-size: 11px;
+  padding: 1px 4px;
+}
+.grid-wide td:nth-child(4) { text-align: right; font-variant-numeric: tabular-nums; }
+/* Backing route and ADR ratio are short, fixed phrases. Letting them wrap made
+   every row two lines tall for the sake of one word, so they hold their line and
+   the type comes down slightly to pay for it. */
+.grid-wide table { font-size: 12px; }
+.grid-wide td:nth-child(5),
+.grid-wide td:nth-child(6) { white-space: nowrap; }

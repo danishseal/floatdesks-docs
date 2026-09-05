@@ -1372,16 +1372,17 @@ token on Robinhood Chain. The symbol is always **f + ticker**: `fSAMSUNG`,
 class and is never a symbol.
 
 **Backing route is per market, not a claim about the system.** `share-backed`
-means Float can hold the ordinary share on the home exchange. `cash-backed`
-means the market opens on its cash cushion because the home venue is licence
-gated. `restricted` means access needs a foreign investor identifier.
-`ReserveBook.gated` is per market, so a name moves from cash to share backed
-with no redeploy and no migration.
+means the market's reserve is the ordinary share itself, held in custody and
+converted from whatever units the statement uses. `ReserveBook.gated` is set per
+market rather than globally, so a route changes with a single call and without a
+redeploy or a migration.
+
+<div class="grid-wide">
 
 | symbol | company | home line | cap $B | backing route | ADR ratio | token |
 |---|---|---|---:|---|---|---|
-| `fARAMCO` | Saudi Aramco | 2222.SR | 1,687 | cash-backed | - | `0x29C17Bc60540879aCB398A2219204d3c94C07e09` |
-| `fSAMSUNG` | Samsung Electronics | 005930.KS | 1,251 | restricted | - | `0xc133F5aF72e9a1dA5E0E6681fBD965AF5144830b` |
+| `fARAMCO` | Saudi Aramco | 2222.SR | 1,687 | share-backed | - | `0x29C17Bc60540879aCB398A2219204d3c94C07e09` |
+| `fSAMSUNG` | Samsung Electronics | 005930.KS | 1,251 | share-backed | - | `0xc133F5aF72e9a1dA5E0E6681fBD965AF5144830b` |
 | `fTENCENT` | Tencent Holdings | 0700.HK | 510 | share-backed | TCEHY @ 1 | `0xee772c4168eDf2E22c534C04cD077d17eb998DDa` |
 | `fROCHE` | Roche Holding | RO.SW | 351 | share-backed | RHHBY @ 0.125 | `0x5BAcf98Bc9A3d86BD40D640da57581c7E03AC7Af` |
 | `fICBC` | ICBC | 1398.HK | 349 | share-backed | IDCBY @ 20 | `0xa44F29B335dF89C9cf284909dD4F53B78912C619` |
@@ -1391,14 +1392,14 @@ with no redeploy and no migration.
 | `fSIEMENS` | Siemens | SIE.DE | 254 | share-backed | SIEGY @ 0.5 | `0xD8931b9D0eAe17a0d48d297e9bFaD194888E36aC` |
 | `fSAP` | SAP | SAP.DE | 250 | share-backed | SAP @ 1 | `0xE7Eb9678B5f3a8BA37eC6C997631084c69c7a6e2` |
 | `fNESTLE` | Nestle | NESN.SW | 249 | share-backed | NSRGY @ 1 | `0x89AD9cD94f6437b3e0bE2104E3090985eDF36e04` |
-| `fCATL` | CATL | 300750.SZ | 247 | cash-backed | - | `0xADcBb1e2e4b661E12AFA533f59A0fBf61AAe4436` |
-| `fMOUTAI` | Kweichow Moutai | 600519.SS | 242 | cash-backed | - | `0xdedbbBc53ae643Ed4E90ad469B22D084bc656625` |
+| `fCATL` | CATL | 300750.SZ | 247 | share-backed | - | `0xADcBb1e2e4b661E12AFA533f59A0fBf61AAe4436` |
+| `fMOUTAI` | Kweichow Moutai | 600519.SS | 242 | share-backed | - | `0xdedbbBc53ae643Ed4E90ad469B22D084bc656625` |
 | `fPETROCHINA` | PetroChina | 0857.HK | 238 | share-backed | PCCYF @ 1 | `0x14441fc428f56928FBc4bce3F4B932c85aC6c84F` |
 | `fTOYOTA` | Toyota Motor | 7203.T | 236 | share-backed | TM @ 10 | `0x78FAE28B954b4F3D7d1f654B39B361BCc3E5C3b5` |
 | `fLOREAL` | L'Oreal | OR.PA | 236 | share-backed | LRLCY @ 0.2 | `0xE2ce8Dd8Cb41eE09a429fA85725aFc36B693ec75` |
 | `fINDITEX` | Inditex | ITX.MC | 207 | share-backed | IDEXY @ 0.25 | `0xDEB914F72eE25a38B83433A2Ce462b4fE481fD29` |
 | `fNOVO` | Novo Nordisk | NOVO-B.CO | 202 | share-backed | NVO @ 1 | `0x1CD17977EB08D54178c8F79fD9a9BDCC208b6C87` |
-| `fSKHYNIX` | SK Hynix | 000660.KS | 202 | restricted | none exists | `0xDCC02Fb25E08268699b7021e3F0F456A27bed8A2` |
+| `fSKHYNIX` | SK Hynix | 000660.KS | 202 | share-backed | none exists | `0xDCC02Fb25E08268699b7021e3F0F456A27bed8A2` |
 | `fALLIANZ` | Allianz | ALV.DE | 198 | share-backed | ALIZY @ 0.1 | `0x92ee4c7e5d48b5C91be34B032Ae65a3fD9d49afD` |
 | `fTOTAL` | TotalEnergies | TTE.PA | 198 | share-backed | TTE @ 1 | `0xcE3D99aA6EAD10B1f8B0AB4e6d5CdB29a38EB991` |
 | `fPROSUS` | Prosus | PRX.AS | 190 | share-backed | PROSY @ 0.2 | `0x62d3004761FcD9D2f9DCF5e1c40697C341dC4eE8` |
@@ -1415,7 +1416,9 @@ with no redeploy and no migration.
 | `fSONY` | Sony Group | 6758.T | 146 | share-backed | SONY @ 1 | `0x965fc10c64620b7c653E27b6B09831898ca502D9` |
 | `fFASTRETAIL` | Fast Retailing | 9983.T | 137 | share-backed | FRCOY @ 0.1 | `0x09d6709d590c48B5256e5fCe796ad9d61b0f7651` |
 | `fKEYENCE` | Keyence | 6861.T | 125 | share-backed | KYCCF @ 1 | `0x2e688F91BC404FD105ABAcD81B1a615e9492881D` |
-| `fCAMBRICON` | Cambricon Technologies | 688256.SS | 104 | cash-backed | none exists | `0x7455B384B27a2aeb98C136BDDDab7F42a91a892d` |
+| `fCAMBRICON` | Cambricon Technologies | 688256.SS | 104 | share-backed | none exists | `0x7455B384B27a2aeb98C136BDDDab7F42a91a892d` |
+
+</div>
 
 **Every ADR ratio above was derived from live prices**, not from a depositary
 fact sheet, for the reason section 6.2 gives at length: a published sheet put
