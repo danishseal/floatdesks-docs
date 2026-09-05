@@ -20,6 +20,120 @@ are worth stating before anything else.
 
 </div>
 
+### What Float is
+
+Float lists the companies the tokenization wave skipped. Of the world's top
+2,000 companies, 1,880 have no token on Robinhood Chain. Nintendo, Tencent,
+Nestle, LVMH, SoftBank and Hermes are all in that group. The reason is plumbing
+rather than demand: buying a Tokyo or Hong Kong listed company from a US account
+means a foreign account, an FX leg, treaty paperwork and a custodian in the home
+market, and no consumer app is going to build that once per country.
+
+Float crosses that wall once, holds the shares on the other side, and issues a
+token against them.
+
+**One fSHARE is one ordinary share of the underlying company, held in custody
+and owed to the holder.** Not a basket, not a tracker, not an index: the
+specific security, in the specific quantity, in a specific account. The claim is
+redeemable, and selling an fSHARE back to the Desk burns it and releases the
+share behind it. It carries no voting rights, which is true of every tokenized
+equity and is worth saying rather than implying.
+
+### How it works
+
+**The Desk** is one vault of USDG standing on both sides of every listing. It
+quotes continuously against a reference price, which is what makes a Japanese
+company tradeable at three in the morning when Tokyo is shut and no pool exists
+to trade against:
+
+```
+buy  = mark * (1 + spread + impact + txFee)
+sell = mark * (1 - spread - impact - txFee)
+```
+
+The spread is 30 basis points while the home exchange is open and 150 when it is
+closed, because a closed exchange is a stale reference and a stale reference is
+worth less. Impact scales with how far a trade pushes the book away from
+balance, so size pays for the risk it creates.
+
+**The reserve** is five public numbers on `ReserveBook.sol`: what is
+outstanding, what custody actually holds, what has been ordered and paid for but
+not yet settled, and the ceilings those imply. Nothing about the backing exists
+off chain except the broker account itself. A market that cannot prove its cover
+becomes settle-only, which is the universal failure state here: existing
+positions can be closed, nothing new can be issued.
+
+**The launch** funds the custody purchase from the first dollar rather than
+waiting at a milestone, thickening the market with every dollar after on a
+decaying ramp. A launched token graduates into two real Uniswap v4 pools, USDG
+to fSHARE to token, with 23.4% of supply seeded into the pool.
+
+### What an ADR is
+
+The promise is one token, one ordinary share. The thing sitting in a US
+brokerage account is frequently not an ordinary share, and pretending otherwise
+is how a reserve quietly becomes fractional.
+
+An American Depositary Receipt is a US-listed certificate issued by a depositary
+bank against home-market shares that bank holds through a local custodian. It
+trades in dollars, settles US-style, and clears through US infrastructure. That
+is its whole purpose: it is a wrapper that lets American plumbing hold a foreign
+asset.
+
+It is a **receipt, not the share**. The depositary is a real counterparty in the
+chain. The receipt can be cancelled, the programme can be terminated, and the
+ratio can be changed. **Sponsored** means the company set the programme up
+itself, so there is one programme and real disclosure. **Unsponsored** means a
+depositary created it without the company's involvement, which is why several
+banks can run competing programmes on the same company and why the terms belong
+to the depositary. Most of Float's target names trade unsponsored on the US OTC
+market, Nintendo and Tencent among them.
+
+### How Float connects to them
+
+**One ADR is almost never one share.** The depositary picks a ratio to put the
+receipt in a comfortable dollar price range, and it differs by name:
+
+| company | line | one receipt is | kind |
+|---|---|---|---|
+| Nintendo | NTDOY | **0.25** ordinary shares | ADR, unsponsored |
+| Tencent | TCEHY | 1 | ADR, unsponsored |
+| Nestle | NSRGY | 1 | ADR, sponsored |
+| LVMH | LVMUY | **0.2** | ADR |
+| SoftBank | SFTBY | **0.5** | ADR |
+| Hermes | HESAY | **0.1** | ADR, not fractionable |
+
+Get that number wrong and the reserve is wrong by exactly that factor. Ship 1.0
+where the truth is 0.2 and the market runs a 5x fractional reserve while every
+on-chain view agrees with itself, because every view is derived from the same
+wrong constant.
+
+We learned it the expensive way. A published fact sheet gave the NTDOY ratio as
+1:8. Float derived it from live prices instead and got 1:0.25, a 32x
+discrepancy against the document, and the live price relationship was the
+correct one. So the rule is explicit: **verify a ratio from prices, never from a
+fact sheet, and check it continuously**, because a depositary can change the
+ratio on an unsponsored programme without asking anyone.
+
+The custodian reports the units on its statement, whatever those units are, and
+the contract converts:
+
+```solidity
+setCustodyUnit(assetId, sharesPerUnit, kind)   // 1e18 = one unit is one ordinary share
+                                               // 2.5e17 = one unit is a quarter of a share
+sharesHeld = unitsHeld * sharesPerUnit / 1e18
+```
+
+`custodyKind` is stored as a string, "ordinary" or "ADR" or "GDR", so the
+reserve page says plainly what is held rather than implying the ordinary share
+everywhere. A ratio change restates the existing position, so the book never
+keeps crediting an old conversion against shares it already holds.
+
+Section 5 is the full mechanical account of how one token becomes one share, and
+section 6 is the whole of the ratio problem.
+
+### What changed since the essay
+
 | | v1, as published | 2.0, as built |
 |---|---|---|
 | **opening a market** | waits at $5,000, then opens | opens on the first dollar and thickens with every one after, on a decaying ramp |
