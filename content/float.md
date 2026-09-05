@@ -1372,44 +1372,44 @@ gated. `restricted` means access needs a foreign investor identifier.
 `ReserveBook.gated` is per market, so a name moves from cash to share backed
 with no redeploy and no migration.
 
-| symbol | company | home line | cap $B | backing route | ADR ratio | on chain |
-|---|---|---|---|---:|---|---|
-| `fARAMCO` | Saudi Aramco | 2222.SR | 1,687 | cash-backed | - | listed |
-| `fSAMSUNG` | Samsung Electronics | 005930.KS | 1,251 | restricted | - | listed |
-| `fTENCENT` | Tencent Holdings | 0700.HK | 510 | share-backed | TCEHY @ 1 | listed |
-| `fROCHE` | Roche Holding | RO.SW | 351 | share-backed | RHHBY @ 0.125 | listed |
-| `fICBC` | ICBC | 1398.HK | 349 | share-backed | IDCBY @ 20 | not yet |
-| `fNOVARTIS` | Novartis | NOVN.SW | 307 | share-backed | NVS @ 1 | not yet |
-| `fMUFG` | Mitsubishi UFJ | 8306.T | 260 | share-backed | MUFG @ 1 | not yet |
-| `fLVMH` | LVMH | MC.PA | 256 | share-backed | LVMUY @ 0.2 | not yet |
-| `fSIEMENS` | Siemens | SIE.DE | 254 | share-backed | SIEGY @ 0.5 | not yet |
-| `fSAP` | SAP | SAP.DE | 250 | share-backed | SAP @ 1 | not yet |
-| `fNESTLE` | Nestle | NESN.SW | 249 | share-backed | NSRGY @ 1 | not yet |
-| `fCATL` | CATL | 300750.SZ | 247 | cash-backed | - | not yet |
-| `fMOUTAI` | Kweichow Moutai | 600519.SS | 242 | cash-backed | - | not yet |
-| `fPETROCHINA` | PetroChina | 0857.HK | 238 | share-backed | PCCYF @ 1 | not yet |
-| `fTOYOTA` | Toyota Motor | 7203.T | 236 | share-backed | TM @ 10 | not yet |
-| `fLOREAL` | L'Oreal | OR.PA | 236 | share-backed | LRLCY @ 0.2 | not yet |
-| `fINDITEX` | Inditex | ITX.MC | 207 | share-backed | IDEXY @ 0.25 | not yet |
-| `fNOVO` | Novo Nordisk | NOVO-B.CO | 202 | share-backed | NVO @ 1 | not yet |
-| `fSKHYNIX` | SK Hynix | 000660.KS | 202 | restricted | none exists | not yet |
-| `fALLIANZ` | Allianz | ALV.DE | 198 | share-backed | ALIZY @ 0.1 | not yet |
-| `fTOTAL` | TotalEnergies | TTE.PA | 198 | share-backed | TTE @ 1 | not yet |
-| `fPROSUS` | Prosus | PRX.AS | 190 | share-backed | PROSY @ 0.2 | not yet |
-| `fSCHNEIDER` | Schneider Electric | SU.PA | 188 | share-backed | SBGSY @ 0.2 | not yet |
-| `fSOFTBANK` | SoftBank Group | 9984.T | 187 | share-backed | SFTBY @ 0.5 | not yet |
-| `fHERMES` | Hermes International | RMS.PA | 187 | share-backed | HESAY @ 0.1 | not yet |
-| `fAIRBUS` | Airbus | AIR.PA | 180 | share-backed | EADSY @ 0.25 | not yet |
-| `fKIOXIA` | KIOXIA | 285A.T | 174 | share-backed | none exists | not yet |
-| `fABB` | ABB | ABBN.SW | 174 | share-backed | ABBNY @ 1 | not yet |
-| `fCMBANK` | CM Bank | 3968.HK | 166 | share-backed | CIHKY @ 5 | not yet |
-| `fROLLSROYCE` | Rolls-Royce | RR.L | 164 | share-backed | RYCEY @ 1 | not yet |
-| `fTOKYOELEC` | Tokyo Electron | 8035.T | 156 | share-backed | TOELY @ 0.5 | not yet |
-| `fHITACHI` | Hitachi | 6501.T | 155 | share-backed | HTHIY @ 1 | not yet |
-| `fSONY` | Sony Group | 6758.T | 146 | share-backed | SONY @ 1 | not yet |
-| `fFASTRETAIL` | Fast Retailing | 9983.T | 137 | share-backed | FRCOY @ 0.1 | not yet |
-| `fKEYENCE` | Keyence | 6861.T | 125 | share-backed | KYCCF @ 1 | not yet |
-| `fCAMBRICON` | Cambricon Technologies | 688256.SS | 104 | cash-backed | none exists | not yet |
+| symbol | company | home line | cap $B | backing route | ADR ratio | token |
+|---|---|---|---:|---|---|---|
+| `fARAMCO` | Saudi Aramco | 2222.SR | 1,687 | cash-backed | - | `0x29C17Bc60540879aCB398A2219204d3c94C07e09` |
+| `fSAMSUNG` | Samsung Electronics | 005930.KS | 1,251 | restricted | - | `0xc133F5aF72e9a1dA5E0E6681fBD965AF5144830b` |
+| `fTENCENT` | Tencent Holdings | 0700.HK | 510 | share-backed | TCEHY @ 1 | `0xee772c4168eDf2E22c534C04cD077d17eb998DDa` |
+| `fROCHE` | Roche Holding | RO.SW | 351 | share-backed | RHHBY @ 0.125 | `0x5BAcf98Bc9A3d86BD40D640da57581c7E03AC7Af` |
+| `fICBC` | ICBC | 1398.HK | 349 | share-backed | IDCBY @ 20 | `0xa44F29B335dF89C9cf284909dD4F53B78912C619` |
+| `fNOVARTIS` | Novartis | NOVN.SW | 307 | share-backed | NVS @ 1 | `0xc3A9e5D6068D686796a05e1162D0613a0665ed7f` |
+| `fMUFG` | Mitsubishi UFJ | 8306.T | 260 | share-backed | MUFG @ 1 | `0xA7012753F6427e2d0901D7161feD1141Bf2624b0` |
+| `fLVMH` | LVMH | MC.PA | 256 | share-backed | LVMUY @ 0.2 | `0x8283d8467E450F64233a9B080fD6886A1Cdf7601` |
+| `fSIEMENS` | Siemens | SIE.DE | 254 | share-backed | SIEGY @ 0.5 | `0xD8931b9D0eAe17a0d48d297e9bFaD194888E36aC` |
+| `fSAP` | SAP | SAP.DE | 250 | share-backed | SAP @ 1 | `0xE7Eb9678B5f3a8BA37eC6C997631084c69c7a6e2` |
+| `fNESTLE` | Nestle | NESN.SW | 249 | share-backed | NSRGY @ 1 | `0x89AD9cD94f6437b3e0bE2104E3090985eDF36e04` |
+| `fCATL` | CATL | 300750.SZ | 247 | cash-backed | - | `0xADcBb1e2e4b661E12AFA533f59A0fBf61AAe4436` |
+| `fMOUTAI` | Kweichow Moutai | 600519.SS | 242 | cash-backed | - | `0xdedbbBc53ae643Ed4E90ad469B22D084bc656625` |
+| `fPETROCHINA` | PetroChina | 0857.HK | 238 | share-backed | PCCYF @ 1 | `0x14441fc428f56928FBc4bce3F4B932c85aC6c84F` |
+| `fTOYOTA` | Toyota Motor | 7203.T | 236 | share-backed | TM @ 10 | `0x78FAE28B954b4F3D7d1f654B39B361BCc3E5C3b5` |
+| `fLOREAL` | L'Oreal | OR.PA | 236 | share-backed | LRLCY @ 0.2 | `0xE2ce8Dd8Cb41eE09a429fA85725aFc36B693ec75` |
+| `fINDITEX` | Inditex | ITX.MC | 207 | share-backed | IDEXY @ 0.25 | `0xDEB914F72eE25a38B83433A2Ce462b4fE481fD29` |
+| `fNOVO` | Novo Nordisk | NOVO-B.CO | 202 | share-backed | NVO @ 1 | `0x1CD17977EB08D54178c8F79fD9a9BDCC208b6C87` |
+| `fSKHYNIX` | SK Hynix | 000660.KS | 202 | restricted | none exists | `0xDCC02Fb25E08268699b7021e3F0F456A27bed8A2` |
+| `fALLIANZ` | Allianz | ALV.DE | 198 | share-backed | ALIZY @ 0.1 | `0x92ee4c7e5d48b5C91be34B032Ae65a3fD9d49afD` |
+| `fTOTAL` | TotalEnergies | TTE.PA | 198 | share-backed | TTE @ 1 | `0xcE3D99aA6EAD10B1f8B0AB4e6d5CdB29a38EB991` |
+| `fPROSUS` | Prosus | PRX.AS | 190 | share-backed | PROSY @ 0.2 | `0x62d3004761FcD9D2f9DCF5e1c40697C341dC4eE8` |
+| `fSCHNEIDER` | Schneider Electric | SU.PA | 188 | share-backed | SBGSY @ 0.2 | `0x1164c58D891664f0DF2775141096BB29Bc6dFaE5` |
+| `fSOFTBANK` | SoftBank Group | 9984.T | 187 | share-backed | SFTBY @ 0.5 | `0x6674Ef23BB5B0fefd8C3b83793020BC90f5c4817` |
+| `fHERMES` | Hermes International | RMS.PA | 187 | share-backed | HESAY @ 0.1 | `0xDf5B12fe3F66e2Bf85A99B4444d7689fBb4f2EEb` |
+| `fAIRBUS` | Airbus | AIR.PA | 180 | share-backed | EADSY @ 0.25 | `0x5a176Db5DB5bc4670570D17bF3e61CfB333BAAF1` |
+| `fKIOXIA` | KIOXIA | 285A.T | 174 | share-backed | none exists | `0xEF299E0248Fcb58fCc3Bc3777dB6349301bC3Be3` |
+| `fABB` | ABB | ABBN.SW | 174 | share-backed | ABBNY @ 1 | `0x69fe0E6eAb6b59485C92d5de18900787D442FaB3` |
+| `fCMBANK` | CM Bank | 3968.HK | 166 | share-backed | CIHKY @ 5 | `0xe5592cCD5371229c7e16Db1297C30Ef9CB2e8EC4` |
+| `fROLLSROYCE` | Rolls-Royce | RR.L | 164 | share-backed | RYCEY @ 1 | `0x98E769Ce88f19B0591994664828462761fd51520` |
+| `fTOKYOELEC` | Tokyo Electron | 8035.T | 156 | share-backed | TOELY @ 0.5 | `0x05A5d55a5f20e690372d3DFa55978D211E9F3C90` |
+| `fHITACHI` | Hitachi | 6501.T | 155 | share-backed | HTHIY @ 1 | `0x27e186dFc8Eed418D28Ca56851C3a6b0e17cE339` |
+| `fSONY` | Sony Group | 6758.T | 146 | share-backed | SONY @ 1 | `0x965fc10c64620b7c653E27b6B09831898ca502D9` |
+| `fFASTRETAIL` | Fast Retailing | 9983.T | 137 | share-backed | FRCOY @ 0.1 | `0x09d6709d590c48B5256e5fCe796ad9d61b0f7651` |
+| `fKEYENCE` | Keyence | 6861.T | 125 | share-backed | KYCCF @ 1 | `0x2e688F91BC404FD105ABAcD81B1a615e9492881D` |
+| `fCAMBRICON` | Cambricon Technologies | 688256.SS | 104 | cash-backed | none exists | `0x7455B384B27a2aeb98C136BDDDab7F42a91a892d` |
 
 **Every ADR ratio above was derived from live prices**, not from a depositary
 fact sheet, for the reason section 6.2 gives at length: a published sheet put
@@ -1438,28 +1438,50 @@ Listings.listings(assetId)   ->  its token, status and parameters
 token.symbol() / token.name()
 ```
 
-On chain at the time of writing:
-
-| symbol | token |
-|---|---|
-| `fARAMCO` | `0x29C17Bc60540879aCB398A2219204d3c94C07e09` |
-| `fSAMSUNG` | `0xc133F5aF72e9a1dA5E0E6681fBD965AF5144830b` |
-| `fTENCENT` | `0xee772c4168eDf2E22c534C04cD077d17eb998DDa` |
-| `fROCHE` | `0x5BAcf98Bc9A3d86BD40D640da57581c7E03AC7Af` |
-| `fNINTENDO` | `0xE609DA2f8A8d85AF4AE7Ec500724D91F69Eeb93c` |
+All thirty-six are listed. `fNINTENDO` is a separate market that predates the
+set, at `0xE609DA2f8A8d85AF4AE7Ec500724D91F69Eeb93c`, and it is the only one
+with a live oracle feed of its own history.
 
 `fNINTENDO` predates the genesis set and is the only market with a live oracle
 feed today. Listing of the rest is in progress, so treat the table above as a
 snapshot and `allAssetIds()` as the answer.
+
+**Two markets currently rest on a single price source.** Both posters carry all
+thirty-six, but EODHD's plan covers neither the Tadawul listing nor the KIOXIA
+line, so `fARAMCO` and `fKIOXIA` are priced by the Yahoo poster alone. They are
+in the median and they are fresh, and they have no second vendor behind them,
+which is a different risk from the other thirty-four and is worth knowing before
+it matters rather than after.
+
+**Four names carry a terser ERC-20 name than the rest.** `fARAMCO`, `fSAMSUNG`,
+`fTENCENT` and `fROCHE` were listed before the naming was settled, so they read
+"Samsung (Float)" where the later ones read "Samsung Electronics (Float)". The
+symbols are correct and consistent throughout, so nothing above is wrong; it is
+the display name only.
 
 Three further assets exist on this Listings, `fNTDO`, `fNTDO2` and `fNTDO3`.
 They are internal test lines carrying a fixed price, not markets, and they are
 excluded from the launchpad for the same reason they are named here rather than
 listed above.
 
-**No share has been bought yet.** `sharesHeld` is zero on every market that
-exists and `gated` is false on all of them, so every token in issue is backed by
-the cash held against it rather than by stock. That is the standing state until
+**No share has been bought yet.** `sharesHeld` is zero on every market and
+`gated` is false on every market, both read across all forty listings, and
+`Desk.reserveValue()` is 0. So every token in issue is backed by the cash held
+against it rather than by stock.
+
+`reserveValue` lives on the **Desk**, not on `ReserveBook`, and it is worth
+knowing why it exists at all. It is a term in the Desk's solvency line:
+
+```
+equity = availableLiquidity + reserveValue - liability
+```
+
+Before it was added the Desk counted only on-chain USDG, so a share bought with
+a buyer's money was an asset that appeared nowhere, and converting cash into
+real backing drove equity down by exactly the amount that had just been backed.
+The act of making the product true was what made the vault look insolvent. So
+`reserveValue` reading 0 is not merely "no shares yet": it is the term that
+moves first when a brokerage account is funded. That is the standing state until
 a brokerage account exists, and it is the sentence worth checking rather than
 any status shown here.
 
