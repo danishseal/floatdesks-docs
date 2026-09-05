@@ -2,7 +2,7 @@
 @import url("/mintlify-assets/_next/static/chunks/462bacc63bed9960.css?dpl=dpl_6Y5n2Y58MHyPukqfbwYtVdV6GiaE");
 @import url("/mintlify-assets/_next/static/chunks/91d23aa3a06b5db4.css?dpl=dpl_6Y5n2Y58MHyPukqfbwYtVdV6GiaE");
 
-/* Float documentation theme — shared visual language with float-web. */
+/* Float documentation theme, sharing a visual language with float-web. */
 :root {
   --pixel-frame-inset: clamp(12px, 1.25vw, 18px);
   --float-cream: #eee9dd;
