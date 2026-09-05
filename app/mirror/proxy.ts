@@ -48,7 +48,7 @@ export async function proxyDocsPage(_request: Request, segments: string[]) {
     ).join("");
     return group === "Overview"
       ? `<p class="nav-group">${escape(group)}</p>${links}`
-      : `<details class="nav-section" data-group="${escape(group)}"><summary class="nav-group"><span class="nav-section-icon nav-section-icon--${groupIndex}" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">${groupIcons[groupIndex - 1]}</svg></span><span class="nav-section-label">${escape(group)}</span></summary>${links}</details>`;
+      : `<details class="nav-section" data-group="${escape(group)}"><summary class="nav-group"><span class="nav-section-icon nav-section-icon--${groupIndex}" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">${groupIcons[groupIndex - 1]}</svg></span><span class="nav-section-label">${escape(group)}</span><span class="nav-plus" aria-hidden="true"></span></summary><div class="nav-section-body">${links}</div></details>`;
   }).join("");
   const neighbor = (offset: number, label: string) => {
     const entry = pages[index + offset];

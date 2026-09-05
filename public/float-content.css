@@ -145,3 +145,43 @@
 .float-page-toc a:hover { color: var(--float-ink); }
 .float-page-toc a[data-current] { color: var(--float-ink); }
 .float-page-toc a[data-current]::before { transform: scaleY(1); }
+
+/* Section toggles that move rather than cut.
+   A <details> has no open/close animation of its own: the content simply is or
+   is not, which on a four section rail reads as the page flinching. The links
+   now sit in a wrapper whose height is animated, and the marker turns from a
+   plus into a minus by rotating its vertical stroke onto the horizontal one,
+   so the state change is a movement the eye can follow rather than a glyph
+   being swapped underneath it. */
+/* The closed state is set here rather than left to the browser. A control
+   <details> injected into this document renders its content when closed just
+   as these did, so the native hiding is not working in the mirrored page at
+   all. Relying on it would have meant an accordion that animates correctly and
+   is permanently open. The inline height the script sets during a transition
+   wins over this while it runs, and clearing it afterwards hands the element
+   back to whichever of the two states applies. */
+.nav-section-body { overflow: hidden; }
+.nav-section:not([open]) > .nav-section-body { height: 0; }
+
+.nav-section > summary::after { content: none; }
+
+.nav-plus {
+  position: relative;
+  flex: 0 0 auto;
+  width: 12px;
+  height: 12px;
+}
+.nav-plus::before,
+.nav-plus::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 1.5px;
+  background: currentColor;
+  transition: transform 260ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.nav-plus::before { transform: translateY(-50%); }
+.nav-plus::after { transform: translateY(-50%) rotate(90deg); }
+.nav-section[open] .nav-plus::after { transform: translateY(-50%) rotate(0deg); }

@@ -669,7 +669,76 @@ keeper and the ceiling comes from the contract, so the keeper reads
 disagrees. It prints the two numbers and says to fix it with `setCustodyUnit`
 rather than guessing.
 
-### 6.4 Picking the line is its own problem
+### 6.4 The flow, end to end
+
+The ratio is not a footnote in this process, it is the unit conversion sitting
+between every step. Here is a purchase from the buyer to settled custody, with
+Nintendo as the worked example because its 0.25 makes every conversion visible.
+
+**1. Someone buys.** $500 of fNINTENDO at the Desk. USDG lands in the vault and
+the token is minted only if the issuance gate passes. At this instant the
+position is **cash backed**: the money is in the vault and no share has been
+bought yet.
+
+**2. The keeper sees the shortfall.** `outstanding` now exceeds
+`sharesHeld + inFlightLive`, and the difference is what has to be acquired.
+
+**3. The ratio is checked before anything is ordered.** From live prices, never
+from a fact sheet, and against the `sharesPerUnit` the chain already holds. This
+is the step the NTDOY incident added: a document said 1:8 where the market said
+1:0.25.
+
+**4. The order is sized in shares and placed in units.** The obligation is in
+ordinary shares; the broker trades ADRs. So
+
+```
+units to buy = ordinary shares owed / sharesPerUnit
+```
+
+Covering 100 ordinary Nintendo shares at 0.25 means buying **400 NTDOY**, not
+100. Getting this backwards is the 32x error, and in the direction that leaves
+the reserve short rather than long.
+
+**5. The order id is derived, not generated.** It is a hash of the on-chain
+state that justified it, so a keeper that dies between placing and reporting
+restarts, computes the same id, and the broker rejects it as a duplicate rather
+than buying twice.
+
+**6. The fill is reported in the statement's own units.**
+`reportExecuted(assetId, units, ref)` records 400, not 100, along with the
+reference it came from. The contract converts on the way in:
+
+```
+sharesHeld = unitsHeld * sharesPerUnit / 1e18
+```
+
+so 400 units at 2.5e17 becomes 100 ordinary-share equivalents. The chain stores
+what custody literally holds and converts to what the token promises, rather
+than storing a converted number nobody reported.
+
+**7. Settlement.** T+2 in most markets. `reportSettled` moves the units out of
+in-flight and writes the **absolute** held figure from the statement, not a
+delta, so a missed report cannot leave the book drifting.
+
+**8. The market becomes share backed.** `sharesHeld` now covers `outstanding`,
+and the cash allowance that was standing in for it shrinks to nothing on its
+own. Nothing switches modes; the cash term simply stops being the binding one.
+
+**9. If the depositary moves the ratio**, `setCustodyUnit` restates the existing
+position from the stored units, so the book never keeps crediting an old
+conversion against shares it already holds. On a verified market it deliberately
+does not restate, because there `sharesHeld` reads a live balance.
+
+**10. Redemption runs the same path backwards** and is never gated. Selling
+burns the fSHARE and releases the share behind it. A market that cannot prove
+its cover goes settle-only, which stops issuance and still lets holders leave.
+
+The thing to hold on to: **Float's obligation is denominated in ordinary shares
+and its custody is denominated in whatever the broker sells.** Every number on
+chain is one of those two, explicitly, and `sharesPerUnit` is the only bridge
+between them.
+
+### 6.5 Picking the line is its own problem
 
 Knowing you want Nintendo is not enough to place an order. Search results for
 these names return the ordinary share, several ADR tiers, look-alike tickers,
@@ -679,7 +748,7 @@ notes record four wrong lines we picked by name before pinning contract ids, and
 the broker adapter now **refuses to trade any line without a pinned contract
 id**. A name is not an instrument.
 
-### 6.5 Fees and dividends, stated rather than glossed
+### 6.6 Fees and dividends, stated rather than glossed
 
 Depositary programmes charge a service fee, typically one to five cents per
 receipt per year, deducted from dividends or billed directly. Home-market
@@ -690,7 +759,7 @@ Float does not currently pass dividends through to holders, and does not claim
 to. That is a real gap rather than a design choice, and it is item 6 in
 section 14. Where the underlying pays, the economics accrue to the reserve.
 
-### 6.6 Why ADRs are not the answer on their own
+### 6.7 Why ADRs are not the answer on their own
 
 They are the easy path, and for many names they are also the only path a US
 broker can take today, which is why Float supports them properly rather than
@@ -990,6 +1059,37 @@ cap falling to $101,000 after one $5 buy. Both now use one expression,
 half stored explicitly so a recompute reproduces the opening value exactly.
 
 ## 11. Fees
+
+Every fee in the system, in one place. Rates are the deployed values.
+
+| fee | parameter | rate | paid by | goes to |
+|---|---|---|---|---|
+| curve trade | `feeBps` | 1.00% each way | curve buyer | 50% the meme's creator, 50% protocol |
+| launch and listing | flat | per launch | the launcher | protocol |
+| Desk spread, in hours | `baseSpreadBps` | 0.30% | Desk trader | retained by the vault |
+| Desk spread, out of hours | `ahSpreadBps` | 1.50% | Desk trader | retained by the vault |
+| Desk size impact | `maxImpactBps` | 0 to 2.00%, quadratic to the cap | Desk trader | retained by the vault |
+| Desk transaction fee | `txFeeBps` | 0.40% | Desk trader | paid away, to holders and the launch queue |
+| protocol slice | `protocolFeeBps` | 0.00% | the Desk LP | protocol |
+| staker slice | `stakerFeeBps` | 0.10% | the Desk LP | cap market stakers |
+| launcher slice | `launcherFeeBps` | 0.10% | the Desk LP | the market's launcher |
+| pool swap | pool fee | 1.00% per hop | pool swapper | that pool's LPs |
+
+Three things the grid does not say on its own.
+
+**A Desk trade costs the sum of its row group, not one row.** In hours and at
+negligible size that is 0.30% plus 0.40%, so 0.70%. Out of hours at the cap it
+is 1.50% plus 2.00% plus 0.40%, so 3.90%. Impact is the only part that depends
+on the trade.
+
+**A route through the pools pays twice.** USDG to MEME crosses the quote hop and
+the meme hop, so a 1.00% pool fee is 2.00% on the round trip in, and the same
+again coming out.
+
+**The three slices are subtractions, not widenings.** `protocolFeeBps`,
+`stakerFeeBps` and `launcherFeeBps` total 0.20% and come out of what the vault
+retained. Nothing in the quote is widened to fund them, so they are paid by the
+Desk LP rather than by the trader.
 
 Grouped by who actually pays.
 

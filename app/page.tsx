@@ -192,6 +192,66 @@ function applyFloatTheme(frame: HTMLIFrameElement) {
   }
 
   /**
+   * Expand and collapse the sidebar sections instead of cutting to them.
+   *
+   * A <details> gives you no animation: the content simply is or is not there.
+   * Driving it by hand means taking over the toggle, because the element
+   * removes its own content the instant `open` flips, which would cut the
+   * closing animation before its first frame.
+   *
+   * Same guarantee as the heading scroll, for the same reason. If frames never
+   * arrive, `transitionend` never fires, and without the timer a section would
+   * be left mid animation with an inline height and, on a close, stuck open.
+   * The timer makes the end state unconditional and the animation the part
+   * that is optional.
+   */
+  if (!doc.documentElement.dataset.floatAccordion) {
+    doc.documentElement.dataset.floatAccordion = "true";
+    const TOGGLE_MS = 260;
+
+    doc.addEventListener("click", (clickEvent) => {
+      const FrameElement = doc.defaultView?.Element;
+      const view = doc.defaultView;
+      if (!FrameElement || !view || !(clickEvent.target instanceof FrameElement)) return;
+      const summary = clickEvent.target.closest("details.nav-section > summary");
+      if (!summary) return;
+      const details = summary.parentElement as HTMLDetailsElement | null;
+      const body = details?.querySelector<HTMLElement>(".nav-section-body");
+      if (!details || !body) return;
+
+      // Let the browser do its own instant thing when motion is unwanted.
+      if (view.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+      clickEvent.preventDefault();
+      const opening = !details.open;
+      if (opening) details.open = true;
+
+      const full = body.scrollHeight;
+      const from = opening ? 0 : full;
+      const to = opening ? full : 0;
+
+      let settled = false;
+      const settle = () => {
+        if (settled) return;
+        settled = true;
+        body.style.transition = "";
+        body.style.height = "";
+        if (!opening) details.open = false;
+      };
+
+      body.style.height = `${from}px`;
+      view.requestAnimationFrame(() => {
+        body.style.transition = `height ${TOGGLE_MS}ms cubic-bezier(0.4, 0, 0.2, 1)`;
+        body.style.height = `${to}px`;
+      });
+      body.addEventListener("transitionend", (e) => {
+        if (e.propertyName === "height") settle();
+      }, { once: true });
+      view.setTimeout(settle, TOGGLE_MS + 120);
+    }, true);
+  }
+
+  /**
    * Mark which section of the page you are actually in.
    *
    * An animated jump only helps if you can see where it put you, and on a long
