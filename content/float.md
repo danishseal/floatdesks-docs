@@ -1,12 +1,15 @@
 # Float
 
+<div class="float-intro">
+
 **Documentation, v2.0.**
 
-The published essay, *Why the biggest companies on earth can't be tokenized, and
-how Float lists them anyway*, is still the argument. Nothing in the thesis has
-moved: 1,880 of the world's top 2,000 companies have no token on Robinhood
-Chain, the reason is plumbing rather than demand, and the answer is to cross the
-wall once and hold the shares on the other side.
+The published essay, [*Why the biggest companies on earth can't be tokenized, and
+how Float lists them anyway*](https://x.com/floatdesks/status/2094998862712754323),
+is still the argument. Nothing in the thesis has moved: 1,880 of the world's top
+2,000 companies have no token on Robinhood Chain, the reason is plumbing rather
+than demand, and the answer is to cross the wall once and hold the shares on the
+other side.
 
 What has moved is the machine. The essay described a market that waited at a
 $5,000 milestone to open and a second at $10,000 to become spot. Building it
@@ -14,6 +17,8 @@ taught us that both numbers were guesses at things the system can measure
 directly, and that the interesting problem was not the milestones but what
 happens between them. So we tweaked it. This is Float 2.0, and the differences
 are worth stating before anything else.
+
+</div>
 
 | | v1, as published | 2.0, as built |
 |---|---|---|
