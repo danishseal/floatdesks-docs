@@ -913,11 +913,93 @@ parameter discipline rather than a guarantee.
 
 ## 8. Price, and the 24/7 mark
 
-`contracts/src/OracleHub.sol`. A median over a poster set, with a per-listing
-staleness window and a deviation clamp against the last accepted value. Below
-`minPosters` or past the window, `getQuote` returns degraded and every dependent
-market drops to settle-only. A market cannot issue against a price nobody is
-confirming.
+Every market in Float prices off one reference, and everything else bends
+around it. This is where it comes from, who supplies it, and what happens when
+they stop.
+
+### 8.1 The hub
+
+`contracts/src/OracleHubMedian.sol`. Posters submit a price, a timestamp and a
+`marketOpen` flag per asset. `getQuote` takes the **median of the submissions
+that are still fresh**, where fresh means within `posterFreshWindow`, 30 minutes
+today, and up to `MAX_POSTERS` of 15 may be registered.
+
+Two details of the median matter more than the median itself.
+
+**The timestamp travels with its price.** The sort is by price and the
+timestamp moves with the entry it belongs to, so the age you read is the age of
+the median submission, not the newest one. With two posters that is the older of
+the two, which means **the quote is only as fresh as the slowest poster**. This
+is not theoretical: one poster was installed with a heartbeat six times longer
+than intended, and although the other was posting exactly on schedule the whole
+board read about 28 minutes stale and was minutes from falling out of its
+freshness window. Both services reported healthy and both logs looked fine. The
+lesson is in the runbook: check the age `getQuote` returns, not whether the
+process is running.
+
+**Losing quorum does not fail loudly, it fails closed.** Below `minPosters`,
+`getQuote` hands back the last known price with its age forced to `DEGRADED_AGE`
+and `marketOpen` false, so the Desk's own staleness check flips the market to
+settle-only. Exits keep working and nothing new opens. An asset that has never
+been posted at all reverts `NeverPosted` rather than returning a zero anyone
+could mistake for a price.
+
+`minPosters` is 1 today, deliberately. With exactly two posters a quorum of two
+means either machine going down puts every market into settle-only, so it is
+raised at three posters, not before.
+
+### 8.2 Where the price comes from
+
+Two independent posters, on separate hosts, reading **different vendors**, so
+one vendor being wrong or unreachable does not move the mark on its own.
+
+| poster | vendor | address |
+|---|---|---|
+| val1 | **EODHD**, paid, All World Extended | `0xE7BaDD2e...41eE6` |
+| val2 | **Yahoo** | `0x4c40771B...29D05` |
+
+Five assets today: NINTENDO, TENCENT, LVMH, NESTLE, SAMSUNG.
+
+The vendor split is **forced rather than chosen**, and it is worth knowing why,
+because it constrains where a third poster can live. EODHD is unreachable over
+IPv6, and val2 is IPv6 only, so val2 can never be the EODHD poster. GitHub is
+IPv4 only from there as well, which is why tooling has to be copied onto that
+box rather than installed.
+
+**Japan does not price directly.** EODHD does not carry Tokyo on the All World
+Extended plan. It carries the US lines of the same companies, so a Japanese name
+is priced through its ADR and converted back:
+
+```
+Nintendo mark  =  NTDOY price  /  0.25 ordinary shares per receipt
+```
+
+The ratio there is the same `sharesPerUnit` the reserve uses, and it is verified
+from live prices for the same reason. So the ADR ratio appears twice in this
+system, once in custody and once in pricing, and an error in it would move both
+the backing and the mark in the same direction, which is precisely why it is
+checked continuously rather than read from a fact sheet. A Nikkei futures line
+sits behind that as a further fallback.
+
+### 8.3 The deadband
+
+A poster that writes every asset on every tick spends a straight product of
+assets times cadence. At a 36 name genesis set on a five minute tick that is
+roughly $15,000 a month of gas to re-post numbers that did not change.
+
+So a post happens when either is true:
+
+- the price differs from the **last posted price** by `MIN_MOVE_BPS`, 10 today;
+- the last post is older than `HEARTBEAT_MS`, which must stay comfortably under
+  the smallest `maxStaleness` in use, 3600s today, rather than equal to it.
+
+The first post of an asset always goes through. The record of what was posted is
+written **only after** the post returns without throwing: writing it earlier
+would mark a failed post as done and suppress its own retry until the next
+heartbeat, which is the one failure a deadband can introduce that posting
+everything cannot.
+
+### 8.4 The premium, and the 24/7 mark
 
 On top of the reference the Desk carries a **premium** of its own, and that is
 what moves the price when the home exchange is shut:
