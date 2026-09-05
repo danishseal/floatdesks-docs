@@ -691,6 +691,8 @@ programme without asking anyone.
 
 ### 6.3 How Float encodes it
 
+{{status:todo|The ratio is set on only ONE of the forty markets. `sharesPerUnit` returns an explicit 2.5e17 for NINTENDO and the 1e18 default for the other thirty-nine, and the default means one custody unit credits as one whole ordinary share. For the seven names with no ADR line, where custody would hold the ordinary share itself, that default is correct. For the rest it is not: attesting ROCHE with 800 RHHBY receipts today would credit 800 shares where the truth is 100, an 8x over-credit in the direction that makes an under-backed market look fully reserved. Set `setCustodyUnit` before the first attest on every ADR-backed market.}}
+
 The custodian always reports the **units on its statement**, whatever those
 units are, and the contract converts:
 
@@ -808,8 +810,8 @@ attestation service reads it rather than being told about it:
 ```
 buy fSHARE on the Desk ──gate──▶ ReserveBook.isFullyReserved(asset)
                                         ▲
-                                        │ attest(asset, sharesHeld, ref)
-                          the attestor ─┘  sharesHeld = adrQty * underlyingPerAdr
+                                        │ attest(asset, UNITS, ref)
+                          the attestor ─┘  units = what the statement says
                                 ▲
                                 │ GET /v2/positions
                              the broker (holds the ADRs)
@@ -817,9 +819,23 @@ buy fSHARE on the Desk ──gate──▶ ReserveBook.isFullyReserved(asset)
 
 `services/attestor` is written against **Alpaca** and reads its positions
 endpoint directly. **Interactive Brokers** is the other broker the reserve work
-targets, for a cash entity account. The conversion from ADR quantity to
-underlying-share equivalent happens on the way in, so what reaches the chain is
-already denominated in the company's own shares.
+targets, for a cash entity account.
+
+**The conversion happens on chain, not on the way in.** `attest` takes the
+number of **units** the custody statement reports, whatever those units are, and
+the contract converts:
+
+```solidity
+attest(assetId, units, custodyRef)      // onlyCustodian
+sharesHeld = units * sharesPerUnit / 1e18
+```
+
+So a statement showing 400 NTDOY receipts is attested as 400 units, and the book
+records 100 shares. Passing an already-converted share count is the error this
+paragraph used to invite: it would be converted a second time and credit a
+quarter of the backing that exists.
+
+{{status:todo|Corrected 2026-09-05. This section previously showed `attest(asset, sharesHeld, ref)` and said the conversion happened before the call, which was the signature on `main`'s older ReserveBook and not the contract deployed at `0x3A4c63B1`. Anyone following the old text would have under-credited the reserve by the ratio.}}
 
 The trust point here is the broker plus the custodian key. That is stated rather
 than hidden: an attested market is only as good as the key that signs for it,
@@ -1647,7 +1663,19 @@ No softening. This is the list.
 11. **A launch-line contributor can claim their Desk shares and withdraw them
     without the cap falling.** Their capital counts toward `launchBacking` and
     is not decremented on claim. Same family as the POL ratchet that was fixed.
-12. **`DESIGN.md`, `FLOW.md` and `CONTRACTS.md` are stale** on the split ratio,
+12. **The ADR ratio is unset on 39 of the 40 markets.** Only NINTENDO carries
+    an explicit `sharesPerUnit`; every other market falls back to the 1e18
+    default, which credits one custody unit as one whole ordinary share. That
+    is correct for the seven names with no ADR line and wrong for every other
+    ADR-backed market, and it errs toward over-crediting. Nothing is
+    mis-stated today because nothing is attested, but this must be set before
+    the first attestation, not after. The two places the ratios live,
+    `services/keepers/reserve-keeper.mjs` and the genesis grid in section 13,
+    are hand-maintained copies with nothing enforcing that they agree, and a
+    third copy in `services/oracle-updater/assets.genesis.json` carries the
+    RECIPROCAL convention (RHHBY as 8.0, not 0.125) while being dead data that
+    nothing reads.
+13. **`DESIGN.md`, `FLOW.md` and `CONTRACTS.md` are stale** on the split ratio,
     the pair target, the cap multiplier and the gap arithmetic. This document is
     the current one.
 
