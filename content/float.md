@@ -921,8 +921,8 @@ they stop.
 
 `contracts/src/OracleHubMedian.sol`. Posters submit a price, a timestamp and a
 `marketOpen` flag per asset. `getQuote` takes the **median of the submissions
-that are still fresh**, where fresh means within `posterFreshWindow`, 30 minutes
-today, and up to `MAX_POSTERS` of 15 may be registered.
+that are still fresh**, where fresh means within `posterFreshWindow`, 21600
+seconds today, and up to `MAX_POSTERS` of 15 may be registered.
 
 Two details of the median matter more than the median itself.
 
@@ -944,21 +944,32 @@ settle-only. Exits keep working and nothing new opens. An asset that has never
 been posted at all reverts `NeverPosted` rather than returning a zero anyone
 could mistake for a price.
 
-`minPosters` is 1 today, deliberately. With exactly two posters a quorum of two
-means either machine going down puts every market into settle-only, so it is
-raised at three posters, not before.
+`minPosters` is 1 today, deliberately. Three posters are registered but only two
+carry all thirty-six, so a quorum of two would still mean either of those two
+going down puts every market into settle-only. It is raised when a third poster
+covers the full set, not merely when a third address exists.
 
 ### 8.2 Where the price comes from
 
-Two independent posters, on separate hosts, reading **different vendors**, so
-one vendor being wrong or unreachable does not move the mark on its own.
+Three registered posters, on separate hosts. Two of them carry the whole set and
+read **different vendors**, so one vendor being wrong or unreachable does not
+move the mark on its own. The third posts a single asset.
 
-| poster | vendor | address |
-|---|---|---|
-| val1 | **EODHD**, paid, All World Extended | `0xE7BaDD2e...41eE6` |
-| val2 | **Yahoo** | `0x4c40771B...29D05` |
+| poster | vendor | covers | address |
+|---|---|---|---|
+| val1 | **EODHD**, paid, All World Extended | all 36 | `0xE7BaDD2e...41eE6` |
+| val2 | **Yahoo** | all 36 | `0x4c40771B...29D05` |
+| the deploy key | its own feed | NINTENDO only | `0x4C9fE79E...9061` |
 
-Five assets today: NINTENDO, TENCENT, LVMH, NESTLE, SAMSUNG.
+That third one is worth knowing about rather than rounding to "three posters",
+because it is the median timestamp above made concrete. Read just now, NINTENDO
+had three fresh submissions: 3,177 and 3,442 seconds old from the two vendors,
+and 16,355 from the third. `getQuote` reported the price as **16,381 seconds
+old**, because the age travels with the median entry and not the newest. Two
+posters under an hour, a quote reading four and a half hours. Nothing is broken
+and nothing would alert; that is simply what a median of three does when one
+member is slower, and it is the reason to read the age the hub returns rather
+than to count healthy processes.
 
 The vendor split is **forced rather than chosen**, and it is worth knowing why,
 because it constrains where a third poster can live. EODHD is unreachable over
@@ -1295,7 +1306,7 @@ turnover needed / open position = gap / spread
 ```
 
 A 10% gap against the 10 bps an LP actually retains in hours is **100x
-turnover**. Against the 130 bps retained after hours it is 7.7x. The
+turnover**. Against the 180 bps retained after hours it is 5.6x. The
 gross-spread version gives 33x and is the wrong number to plan with, because
 20 bps of the 30 is carved out before an LP sees it.
 
