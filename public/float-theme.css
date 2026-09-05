@@ -4,7 +4,8 @@
 
 /* Float documentation theme, sharing a visual language with float-web. */
 :root {
-  --pixel-frame-inset: clamp(12px, 1.25vw, 18px);
+  --pixel-frame-inset: 1rem;
+  --mintlify-slot-header-height: 3rem;
   --float-cream: #eee9dd;
   --float-cream-deep: #e7e1d2;
   --float-ink: #1a1a1a;
@@ -430,7 +431,7 @@ html.dark footer#footer * {
 
 @media (max-width: 640px) {
   :root {
-    --pixel-frame-inset: 8px;
+    --pixel-frame-inset: 1rem;
   }
 
   html #search-bar-entry,
