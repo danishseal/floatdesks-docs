@@ -738,7 +738,67 @@ and its custody is denominated in whatever the broker sells.** Every number on
 chain is one of those two, explicitly, and `sharesPerUnit` is the only bridge
 between them.
 
-### 6.5 Picking the line is its own problem
+### 6.5 Who holds it, and who prices it
+
+Three different counterparties sit behind an ADR-backed market, and they fail in
+different ways, so they are worth naming separately.
+
+**The depositary bank issues the receipt, and Float does not choose it.** Float
+buys whatever line already exists. On an unsponsored programme, which is what
+most of these names trade on, the depositary set the programme up without the
+company and owns its terms: it can change the ratio, and it can terminate the
+programme. That is a counterparty Float holds exposure to and cannot negotiate
+with, which is the honest reason section 6.8 exists.
+
+**The broker holds the position.** Custody is a real brokerage account, and the
+attestation service reads it rather than being told about it:
+
+```
+buy fSHARE on the Desk ──gate──▶ ReserveBook.isFullyReserved(asset)
+                                        ▲
+                                        │ attest(asset, sharesHeld, ref)
+                          the attestor ─┘  sharesHeld = adrQty * underlyingPerAdr
+                                ▲
+                                │ GET /v2/positions
+                             the broker (holds the ADRs)
+```
+
+`services/attestor` is written against **Alpaca** and reads its positions
+endpoint directly. **Interactive Brokers** is the other broker the reserve work
+targets, for a cash entity account. The conversion from ADR quantity to
+underlying-share equivalent happens on the way in, so what reaches the chain is
+already denominated in the company's own shares.
+
+The trust point here is the broker plus the custodian key. That is stated rather
+than hidden: an attested market is only as good as the key that signs for it,
+which is why the attestation history is kept on chain as a series rather than a
+single current figure.
+
+**Verified custody removes the key entirely**, where it is available. If the
+backing is itself an on-chain token that is redeemable for the share, the chain
+reads a balance instead of believing a signature, and `attest`,
+`reportExecuted` and `reportSettled` all revert on that market so nobody can
+quietly go back to trusting a key. A **Dinari** adapter for that mode is
+prototyped and not deployed.
+
+**The price comes from two vendors, not one.** The oracle is a median hub with
+independent posters, so a single vendor being wrong or unreachable does not move
+the mark:
+
+| poster | vendor | note |
+|---|---|---|
+| one | **EODHD**, paid, All World Extended | does not carry Tokyo on this plan |
+| two | **Yahoo** | reachable over IPv6, which EODHD is not |
+
+That split is forced rather than chosen. EODHD is unreachable over IPv6 and the
+second host is IPv6 only, so it cannot ever be the EODHD poster. And because
+EODHD does not carry Tokyo on this plan, Japanese names are priced through their
+US line and an FX leg: Nintendo through NTDOY and JPY/USD, with a Nikkei futures
+proxy as a further fallback. The same ADR ratio problem therefore appears twice,
+once in custody and once in pricing, and it is the same `sharesPerUnit` number
+both times.
+
+### 6.6 Picking the line is its own problem
 
 Knowing you want Nintendo is not enough to place an order. Search results for
 these names return the ordinary share, several ADR tiers, look-alike tickers,
@@ -748,7 +808,7 @@ notes record four wrong lines we picked by name before pinning contract ids, and
 the broker adapter now **refuses to trade any line without a pinned contract
 id**. A name is not an instrument.
 
-### 6.6 Fees and dividends, stated rather than glossed
+### 6.7 Fees and dividends, stated rather than glossed
 
 Depositary programmes charge a service fee, typically one to five cents per
 receipt per year, deducted from dividends or billed directly. Home-market
@@ -759,7 +819,7 @@ Float does not currently pass dividends through to holders, and does not claim
 to. That is a real gap rather than a design choice, and it is item 6 in
 section 14. Where the underlying pays, the economics accrue to the reserve.
 
-### 6.7 Why ADRs are not the answer on their own
+### 6.8 Why ADRs are not the answer on their own
 
 They are the easy path, and for many names they are also the only path a US
 broker can take today, which is why Float supports them properly rather than
