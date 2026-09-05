@@ -691,7 +691,7 @@ programme without asking anyone.
 
 ### 6.3 How Float encodes it
 
-{{status:todo|The ratio is set on only ONE of the forty markets. `sharesPerUnit` returns an explicit 2.5e17 for NINTENDO and the 1e18 default for the other thirty-nine, and the default means one custody unit credits as one whole ordinary share. For the seven names with no ADR line, where custody would hold the ordinary share itself, that default is correct. For the rest it is not: attesting ROCHE with 800 RHHBY receipts today would credit 800 shares where the truth is 100, an 8x over-credit in the direction that makes an under-backed market look fully reserved. Set `setCustodyUnit` before the first attest on every ADR-backed market.}}
+{{status:live|Set on all forty markets as of 2026-09-05, and read back off chain: ROCHE 1.25e17 "ADR RHHBY 1:0.125", ICBC 2e19 "ADR IDCBY 1:20", TOYOTA 1e19, CMBANK 5e18, HERMES 1e17, the seven non-ADR names 1e18 "ordinary". Before this, only NINTENDO carried a ratio and every other market used the 1e18 default, so attesting ROCHE with 800 RHHBY receipts would have credited 800 shares where the truth is 100. It now credits 100. Each ratio was confirmed three ways: this grid, the reciprocal in `assets.genesis.json`, and live prices `adrUsd / (homeLocal * fx)`, which agreed within 2% on all 29 ADR markets. `scripts/set-custody-ratios.sh` is the script, and re-running it reports all 36 already correct.}}
 
 The custodian always reports the **units on its statement**, whatever those
 units are, and the contract converts:
@@ -1663,18 +1663,18 @@ No softening. This is the list.
 11. **A launch-line contributor can claim their Desk shares and withdraw them
     without the cap falling.** Their capital counts toward `launchBacking` and
     is not decremented on claim. Same family as the POL ratchet that was fixed.
-12. **The ADR ratio is unset on 39 of the 40 markets.** Only NINTENDO carries
-    an explicit `sharesPerUnit`; every other market falls back to the 1e18
-    default, which credits one custody unit as one whole ordinary share. That
-    is correct for the seven names with no ADR line and wrong for every other
-    ADR-backed market, and it errs toward over-crediting. Nothing is
-    mis-stated today because nothing is attested, but this must be set before
-    the first attestation, not after. The two places the ratios live,
-    `services/keepers/reserve-keeper.mjs` and the genesis grid in section 13,
-    are hand-maintained copies with nothing enforcing that they agree, and a
-    third copy in `services/oracle-updater/assets.genesis.json` carries the
-    RECIPROCAL convention (RHHBY as 8.0, not 0.125) while being dead data that
-    nothing reads.
+12. **The ADR ratios now live in four hand-maintained copies.** The chain
+    itself is no longer one of the problems: `setCustodyUnit` was run across
+    all forty markets on 2026-09-05, so the ratio and the custody kind are on
+    chain and correct. What is unresolved is that the same numbers are also
+    written out in `services/keepers/reserve-keeper.mjs`, in the genesis grid
+    in section 13, and in `services/oracle-updater/assets.genesis.json`, which
+    carries the RECIPROCAL convention (RHHBY as 8.0, not 0.125) and is dead
+    data that `updater.mjs` never reads. Nothing enforces that the four agree,
+    and the keeper's own comment says its map must match `setCustodyUnit`. A
+    reciprocal sitting next to a real ratio is the shape of the 1:8 fact sheet
+    that started all of this. The fix is to derive them from one source rather
+    than to keep checking four.
 13. **`DESIGN.md`, `FLOW.md` and `CONTRACTS.md` are stale** on the split ratio,
     the pair target, the cap multiplier and the gap arithmetic. This document is
     the current one.
