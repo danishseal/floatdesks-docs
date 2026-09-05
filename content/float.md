@@ -1357,6 +1357,117 @@ Four launches have run end to end, each a meme quoted in the fSHARE it settles
 in, with eight Uniswap v4 pools carrying real two-sided liquidity. The most
 recent graduated with zero burn and 23.3% of supply into its pool.
 
+### The genesis set
+
+Thirty-six markets, chosen by market capitalisation from the companies with no
+token on Robinhood Chain. The symbol is always **f + ticker**: `fSAMSUNG`,
+`fTENCENT`, `fLVMH`. The ERC-20 name is the company plus a suffix, so
+`fNINTENDO` is "Nintendo Co Ltd (Float)". "fSHARE" is the noun for the asset
+class and is never a symbol.
+
+**Backing route is per market, not a claim about the system.** `share-backed`
+means Float can hold the ordinary share on the home exchange. `cash-backed`
+means the market opens on its cash cushion because the home venue is licence
+gated. `restricted` means access needs a foreign investor identifier.
+`ReserveBook.gated` is per market, so a name moves from cash to share backed
+with no redeploy and no migration.
+
+| symbol | company | home line | cap $B | backing route | ADR ratio | on chain |
+|---|---|---|---|---:|---|---|
+| `fARAMCO` | Saudi Aramco | 2222.SR | 1,687 | cash-backed | - | listed |
+| `fSAMSUNG` | Samsung Electronics | 005930.KS | 1,251 | restricted | - | listed |
+| `fTENCENT` | Tencent Holdings | 0700.HK | 510 | share-backed | TCEHY @ 1 | listed |
+| `fROCHE` | Roche Holding | RO.SW | 351 | share-backed | RHHBY @ 0.125 | listed |
+| `fICBC` | ICBC | 1398.HK | 349 | share-backed | IDCBY @ 20 | not yet |
+| `fNOVARTIS` | Novartis | NOVN.SW | 307 | share-backed | NVS @ 1 | not yet |
+| `fMUFG` | Mitsubishi UFJ | 8306.T | 260 | share-backed | MUFG @ 1 | not yet |
+| `fLVMH` | LVMH | MC.PA | 256 | share-backed | LVMUY @ 0.2 | not yet |
+| `fSIEMENS` | Siemens | SIE.DE | 254 | share-backed | SIEGY @ 0.5 | not yet |
+| `fSAP` | SAP | SAP.DE | 250 | share-backed | SAP @ 1 | not yet |
+| `fNESTLE` | Nestle | NESN.SW | 249 | share-backed | NSRGY @ 1 | not yet |
+| `fCATL` | CATL | 300750.SZ | 247 | cash-backed | - | not yet |
+| `fMOUTAI` | Kweichow Moutai | 600519.SS | 242 | cash-backed | - | not yet |
+| `fPETROCHINA` | PetroChina | 0857.HK | 238 | share-backed | PCCYF @ 1 | not yet |
+| `fTOYOTA` | Toyota Motor | 7203.T | 236 | share-backed | TM @ 10 | not yet |
+| `fLOREAL` | L'Oreal | OR.PA | 236 | share-backed | LRLCY @ 0.2 | not yet |
+| `fINDITEX` | Inditex | ITX.MC | 207 | share-backed | IDEXY @ 0.25 | not yet |
+| `fNOVO` | Novo Nordisk | NOVO-B.CO | 202 | share-backed | NVO @ 1 | not yet |
+| `fSKHYNIX` | SK Hynix | 000660.KS | 202 | restricted | none exists | not yet |
+| `fALLIANZ` | Allianz | ALV.DE | 198 | share-backed | ALIZY @ 0.1 | not yet |
+| `fTOTAL` | TotalEnergies | TTE.PA | 198 | share-backed | TTE @ 1 | not yet |
+| `fPROSUS` | Prosus | PRX.AS | 190 | share-backed | PROSY @ 0.2 | not yet |
+| `fSCHNEIDER` | Schneider Electric | SU.PA | 188 | share-backed | SBGSY @ 0.2 | not yet |
+| `fSOFTBANK` | SoftBank Group | 9984.T | 187 | share-backed | SFTBY @ 0.5 | not yet |
+| `fHERMES` | Hermes International | RMS.PA | 187 | share-backed | HESAY @ 0.1 | not yet |
+| `fAIRBUS` | Airbus | AIR.PA | 180 | share-backed | EADSY @ 0.25 | not yet |
+| `fKIOXIA` | KIOXIA | 285A.T | 174 | share-backed | none exists | not yet |
+| `fABB` | ABB | ABBN.SW | 174 | share-backed | ABBNY @ 1 | not yet |
+| `fCMBANK` | CM Bank | 3968.HK | 166 | share-backed | CIHKY @ 5 | not yet |
+| `fROLLSROYCE` | Rolls-Royce | RR.L | 164 | share-backed | RYCEY @ 1 | not yet |
+| `fTOKYOELEC` | Tokyo Electron | 8035.T | 156 | share-backed | TOELY @ 0.5 | not yet |
+| `fHITACHI` | Hitachi | 6501.T | 155 | share-backed | HTHIY @ 1 | not yet |
+| `fSONY` | Sony Group | 6758.T | 146 | share-backed | SONY @ 1 | not yet |
+| `fFASTRETAIL` | Fast Retailing | 9983.T | 137 | share-backed | FRCOY @ 0.1 | not yet |
+| `fKEYENCE` | Keyence | 6861.T | 125 | share-backed | KYCCF @ 1 | not yet |
+| `fCAMBRICON` | Cambricon Technologies | 688256.SS | 104 | cash-backed | none exists | not yet |
+
+**Every ADR ratio above was derived from live prices**, not from a depositary
+fact sheet, for the reason section 6.2 gives at length: a published sheet put
+NTDOY at 1:8 where the price relationship said 1:0.25, and shipping that would
+have run Nintendo at a quarter reserve with every on-chain view agreeing with
+itself. Twelve of them landed exactly on a standard depositary ratio. It is the
+same number `setCustodyUnit` takes, so the price side and the custody side use
+one verified constant rather than two.
+
+**Two names were excluded deliberately**, and it is worth saying rather than
+leaving a gap. SMIC (0981.HK) and China Mobile (0941.HK) are prohibited holdings
+for US persons under the NS-CMIC executive order, and their US lines were
+delisted under it, which is why their quotes come back empty. Every other wall
+in this set is plumbing, and plumbing can be crossed once and reused. That one
+is permission, and no custody engineering crosses it.
+
+### Confirming a market is real
+
+The addresses below are here so the claim can be checked rather than believed.
+Resolve them yourself rather than trusting this page:
+
+```
+Registry.addrs("LISTINGS")   ->  the Listings contract
+Listings.allAssetIds()       ->  every market that exists
+Listings.listings(assetId)   ->  its token, status and parameters
+token.symbol() / token.name()
+```
+
+On chain at the time of writing:
+
+| symbol | token |
+|---|---|
+| `fARAMCO` | `0x29C17Bc60540879aCB398A2219204d3c94C07e09` |
+| `fSAMSUNG` | `0xc133F5aF72e9a1dA5E0E6681fBD965AF5144830b` |
+| `fTENCENT` | `0xee772c4168eDf2E22c534C04cD077d17eb998DDa` |
+| `fROCHE` | `0x5BAcf98Bc9A3d86BD40D640da57581c7E03AC7Af` |
+| `fNINTENDO` | `0xE609DA2f8A8d85AF4AE7Ec500724D91F69Eeb93c` |
+
+`fNINTENDO` predates the genesis set and is the only market with a live oracle
+feed today. Listing of the rest is in progress, so treat the table above as a
+snapshot and `allAssetIds()` as the answer.
+
+Three further assets exist on this Listings, `fNTDO`, `fNTDO2` and `fNTDO3`.
+They are internal test lines carrying a fixed price, not markets, and they are
+excluded from the launchpad for the same reason they are named here rather than
+listed above.
+
+**No share has been bought yet.** `sharesHeld` is zero on every market that
+exists and `gated` is false on all of them, so every token in issue is backed by
+the cash held against it rather than by stock. That is the standing state until
+a brokerage account exists, and it is the sentence worth checking rather than
+any status shown here.
+
+Deliberately not stated as an invariant: that nothing is trading. Halted is the
+designed birth state for a curve-funded market and it goes Live on its first
+buy, funded by that buy, so a market changing status is the system working
+rather than a change of plan. Read the reserve, not the status.
+
 ### Live parameters
 
 | | |
