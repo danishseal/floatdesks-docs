@@ -991,7 +991,8 @@ So a post happens when either is true:
 
 - the price differs from the **last posted price** by `MIN_MOVE_BPS`, 10 today;
 - the last post is older than `HEARTBEAT_MS`, which must stay comfortably under
-  the smallest `maxStaleness` in use, 3600s today, rather than equal to it.
+  the smallest `maxStaleness` in use, 14400s on every live market today, rather
+  than equal to it.
 
 The first post of an asset always goes through. The record of what was posted is
 written **only after** the post returns without throwing: writing it earlier
