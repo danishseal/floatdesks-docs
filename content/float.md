@@ -51,10 +51,10 @@ buy  = mark * (1 + spread + impact + txFee)
 sell = mark * (1 - spread - impact - txFee)
 ```
 
-The spread is 30 basis points while the home exchange is open and 150 when it is
-closed, because a closed exchange is a stale reference and a stale reference is
-worth less. Impact scales with how far a trade pushes the book away from
-balance, so size pays for the risk it creates.
+The spread is 30 basis points while the home exchange is open and 200 when it is
+closed. That widening is retained by the vault in full, and it is what pays for
+quoting a company whose own exchange is shut. Impact scales with how far a trade
+pushes the book away from balance, so size pays for the risk it creates.
 
 **The reserve** is five public numbers on `ReserveBook.sol`: what is
 outstanding, what custody actually holds, what has been ordered and paid for but
@@ -857,9 +857,9 @@ buy  = mark * (1 + spread + impact + txFee)
 sell = mark * (1 - spread - impact - txFee)
 ```
 
-`spread` is 30 bps while the underlying exchange is open and 150 bps when it is
-not, because a closed exchange is a stale reference and a stale reference is
-worth less. `impact` scales quadratically with how far the trade pushes the book
+`spread` is 30 bps while the underlying exchange is open and 200 bps when it is
+not. A closed exchange is a stale reference, and the whole of that widening
+stays in the vault to cover the risk of quoting against one. `impact` scales quadratically with how far the trade pushes the book
 from balance, reaching 200 bps at the cap:
 
 ```solidity
@@ -902,7 +902,7 @@ LP equity change = spread + impact - protocolFee - stakerFee - launcherFee
 ```
 
 At live settings, in hours: `30 - 0 - 10 - 10 = +10 bps` of a 30 bps spread.
-After hours: `150 - 20 = +130 bps`.
+After hours: `200 - 20 = +180 bps`.
 
 Worth stating flatly, because the parameter table misleads on it: **of the three
 things that widen the price, only the txFee is paid out. Of the four things paid
@@ -1209,7 +1209,7 @@ Every fee in the system, in one place. Rates are the deployed values.
 | curve trade | `feeBps` | 1.00% each way | curve buyer | 50% the meme's creator, 50% protocol |
 | launch and listing | flat | per launch | the launcher | protocol |
 | Desk spread, in hours | `baseSpreadBps` | 0.30% | Desk trader | retained by the vault |
-| Desk spread, out of hours | `ahSpreadBps` | 1.50% | Desk trader | retained by the vault |
+| Desk spread, out of hours | `ahSpreadBps` | 2.00% | Desk trader | retained by the vault, in full |
 | Desk size impact | `maxImpactBps` | 0 to 2.00%, quadratic to the cap | Desk trader | retained by the vault |
 | Desk transaction fee | `txFeeBps` | 0.40% | Desk trader | paid away, to holders and the launch queue |
 | protocol slice | `protocolFeeBps` | 0.00% | the Desk LP | protocol |
@@ -1221,7 +1221,7 @@ Three things the grid does not say on its own.
 
 **A Desk trade costs the sum of its row group, not one row.** In hours and at
 negligible size that is 0.30% plus 0.40%, so 0.70%. Out of hours at the cap it
-is 1.50% plus 2.00% plus 0.40%, so 3.90%. Impact is the only part that depends
+is 2.00% plus 2.00% plus 0.40%, so 4.40%. Impact is the only part that depends
 on the trade.
 
 **A route through the pools pays twice.** USDG to MEME crosses the quote hop and
@@ -1240,8 +1240,14 @@ split 50/50 between the meme's creator and the protocol. Flat launch and listing
 fees.
 
 **A Desk trader, as a wider price.** `baseSpreadBps` 30 in hours, `ahSpreadBps`
-150 outside them, `maxImpactBps` up to 200 at the cap, `txFeeBps` 40. The first
+200 outside them, `maxImpactBps` up to 200 at the cap, `txFeeBps` 40. The first
 three are retained by the vault. The last is paid away.
+
+The out of hours widening is the one to understand, because it is the largest
+and it is entirely the vault's. Nothing is carved out of it. It exists because
+quoting a company while its own exchange is closed is a genuinely worse
+position to be in, and the vault is the party carrying that, so it is the party
+paid for it.
 
 **The Desk LP, out of the retained spread.** `protocolFeeBps` 0, `stakerFeeBps`
 10, `launcherFeeBps` 10. These are subtractions from LP equity that no widening
@@ -1496,7 +1502,7 @@ rather than a change of plan. Read the reserve, not the status.
 |---|---|
 | curve | `virtualBps` 4000, `feeBps` 100, `creatorShareBps` 5000, `vaultShareBps` 5000 |
 | graduation | `gradMultiplierBps` 6000, pool fee 1.00%, spacing 200, `tailSteps` 20 |
-| Desk | spread 30 / 150 bps, impact 200 bps at cap, `txFeeBps` 40 |
+| Desk | spread 30 / 200 bps, impact 200 bps at cap, `txFeeBps` 40 |
 | Desk payouts | protocol 0, staker 10, launcher 10 bps |
 | premium | band 300 bps at night, push 200 bps at cap, decay 100 bps/hour |
 | funding | `pairTarget` $55, `defaultCapMultiplierBps` 20000, `minHeadroomBps` 1000 |
