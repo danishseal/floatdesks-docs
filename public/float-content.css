@@ -119,3 +119,29 @@
 }
 .float-intro > :first-child { margin-top: 0; }
 .float-intro > :last-child { margin-bottom: 0; }
+
+/* The page rail as a position, not a menu. The marker is a rule down the left
+   edge that fills in on the section you are in, so the eye can find it without
+   the text changing weight and reflowing the column. */
+.float-page-toc a {
+  position: relative;
+  padding-left: 12px;
+  color: var(--float-ink-muted);
+  text-decoration: none;
+  transition: color 160ms ease;
+}
+.float-page-toc a::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 2px;
+  bottom: 2px;
+  width: 2px;
+  background: var(--float-ink);
+  transform: scaleY(0);
+  transform-origin: top;
+  transition: transform 220ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.float-page-toc a:hover { color: var(--float-ink); }
+.float-page-toc a[data-current] { color: var(--float-ink); }
+.float-page-toc a[data-current]::before { transform: scaleY(1); }

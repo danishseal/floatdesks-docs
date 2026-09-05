@@ -5,6 +5,65 @@ import { BackgroundSquares } from "./components/background-squares";
 
 const MIRROR_VERSION = "float-v2-groups-1";
 
+/**
+ * Move to a heading, visibly, and always arrive.
+ *
+ * Two things made this worth writing by hand instead of passing
+ * `behavior: "smooth"` to scrollIntoView.
+ *
+ * The content lives in an iframe whose scroller is #content-container, not the
+ * document, so the anchor's default behaviour has nothing to scroll. That part
+ * was already handled by intercepting the click.
+ *
+ * The second is why this is a tween rather than a one-line option: a native
+ * smooth scroll is an animation, and an animation that never gets a frame
+ * never moves. Measured in this frame, a smooth scrollTo to 2010 sat at 0 a
+ * full second later while the identical call with "auto" arrived immediately.
+ * A jump that always lands is worse UX than one that animates, but far better
+ * than one that silently does nothing, so this does both: it eases when frames
+ * are coming, and a timer guarantees the destination when they are not.
+ */
+const SCROLL_MS = 420;
+const HEADING_OFFSET = 24;
+
+function scrollToHeading(doc: Document, id: string) {
+  const target = doc.getElementById(id);
+  const view = doc.defaultView;
+  if (!target || !view) return;
+
+  const scroller = doc.querySelector<HTMLElement>("#content-container");
+  if (!scroller) return;
+
+  const max = scroller.scrollHeight - scroller.clientHeight;
+  const to = Math.max(0, Math.min(max, target.offsetTop - HEADING_OFFSET));
+  const from = scroller.scrollTop;
+  if (Math.abs(to - from) < 2) return;
+
+  const still = view.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (still) {
+    scroller.scrollTop = to;
+    return;
+  }
+
+  const started = view.performance.now();
+  const ease = (x: number) => 1 - Math.pow(1 - x, 3);
+  let arrived = false;
+
+  const step = (now: number) => {
+    const t = Math.min(1, (now - started) / SCROLL_MS);
+    scroller.scrollTop = from + (to - from) * ease(t);
+    if (t < 1) view.requestAnimationFrame(step);
+    else arrived = true;
+  };
+  view.requestAnimationFrame(step);
+
+  // The guarantee. If frames never came, this is the whole movement; if they
+  // did, it is a no-op on a value already reached.
+  view.setTimeout(() => {
+    if (!arrived) scroller.scrollTop = to;
+  }, SCROLL_MS + 80);
+}
+
 function getMirrorUrl(pathname: string, hash = "") {
   let normalizedPath = pathname;
   if (normalizedPath === "/mirror") normalizedPath = "/";
@@ -71,9 +130,7 @@ function applyFloatTheme(frame: HTMLIFrameElement) {
         document.title = nextDoc.title;
         doc.querySelector<HTMLDetailsElement>(".mobile-navigation")?.removeAttribute("open");
         if (url.hash) {
-          doc.getElementById(decodeURIComponent(url.hash.slice(1)))?.scrollIntoView({
-            block: "start",
-          });
+          scrollToHeading(doc, decodeURIComponent(url.hash.slice(1)));
         }
       } catch (error) {
         console.error(error);
@@ -97,9 +154,7 @@ function applyFloatTheme(frame: HTMLIFrameElement) {
       const rawHref = link.getAttribute("href");
       if (rawHref?.startsWith("#")) {
         clickEvent.preventDefault();
-        doc.getElementById(decodeURIComponent(rawHref.slice(1)))?.scrollIntoView({
-          block: "start",
-        });
+        scrollToHeading(doc, decodeURIComponent(rawHref.slice(1)));
         frame.contentWindow?.history.pushState({}, "", rawHref);
         return;
       }
@@ -134,6 +189,55 @@ function applyFloatTheme(frame: HTMLIFrameElement) {
   const sidebarContent = doc.querySelector<HTMLElement>("#sidebar-content");
   if (!scrollWindow || !bodyFrame) {
     return;
+  }
+
+  /**
+   * Mark which section of the page you are actually in.
+   *
+   * An animated jump only helps if you can see where it put you, and on a long
+   * page the rail was a static list that never acknowledged the scroll. This
+   * marks the last heading you have passed, so the rail is a position rather
+   * than a menu.
+   *
+   * Guarded by a dataset flag because applyFloatTheme runs on every frame load
+   * and a second listener would double every update.
+   */
+  if (!doc.documentElement.dataset.floatScrollspy) {
+    doc.documentElement.dataset.floatScrollspy = "true";
+    const links = [...doc.querySelectorAll<HTMLAnchorElement>(".float-page-toc a[href^='#']")];
+    if (links.length) {
+      const headings = links
+        .map((link) => ({ link, el: doc.getElementById(decodeURIComponent(link.hash.slice(1))) }))
+        .filter((entry): entry is { link: HTMLAnchorElement; el: HTMLElement } => Boolean(entry.el));
+
+      const mark = () => {
+        // The heading nearest the top that is still above the fold line. A
+        // fixed offset rather than the exact top edge, so a heading counts as
+        // reached once it is comfortably on screen rather than at the instant
+        // its first pixel appears.
+        const line = scrollWindow.scrollTop + 96;
+        let current = headings[0];
+        for (const entry of headings) if (entry.el.offsetTop <= line) current = entry;
+        for (const entry of headings) {
+          entry.link.toggleAttribute("data-current", entry === current);
+        }
+      };
+
+      let queued = false;
+      scrollWindow.addEventListener(
+        "scroll",
+        () => {
+          if (queued) return;
+          queued = true;
+          doc.defaultView?.requestAnimationFrame(() => {
+            queued = false;
+            mark();
+          });
+        },
+        { passive: true },
+      );
+      mark();
+    }
   }
 
   const pinSidebar = () => {
