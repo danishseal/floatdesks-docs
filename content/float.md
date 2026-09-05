@@ -1,7 +1,5 @@
 # Float
 
-<div class="float-intro">
-
 **Documentation, v2.0.**
 
 The published essay, [*Why the biggest companies on earth can't be tokenized, and
@@ -17,8 +15,6 @@ taught us that both numbers were guesses at things the system can measure
 directly, and that the interesting problem was not the milestones but what
 happens between them. So we tweaked it. This is Float 2.0, and the differences
 are worth stating before anything else.
-
-</div>
 
 ### What Float is
 
@@ -558,31 +554,6 @@ a single current figure proves less than a series does:
 | `UnderReserved` | shares held and tokens outstanding, at the moment coverage broke |
 
 `attestationAt(assetId, i)` walks the on-chain ring buffer directly.
-
----
-
-> ## Current status
->
-> **The reserve rail described in section 5 is deployed and enforced on chain.
-> The brokerage account behind it is not yet funded.**
->
-> Built, deployed on Robinhood Chain 4663, and exercised: the ReserveBook, both
-> custody modes, the issuance gate inside the Desk, the ratchet, the TTL, the
-> fill-idempotency guard, the ADR ratio machinery, the keeper and its three
-> broker adapters, and the ratio-mismatch refusal.
->
-> Not yet done: **no real share has been bought.** `sharesHeld` is zero on every
-> market, `reserveValue` is $0, and no live market is currently gated. Every
-> token in issue today is backed by the cash held against it, which is the
-> `cashBackedShares` term in 5.4, not by stock.
->
-> So, plainly:
->
-> **Today: cash-backed, with the share rail built and idle. Designed and coded:
-> share-backed. The distance between them is a funded brokerage account, not a
-> contract that has yet to be written.**
->
-> Section 14 lists every other gap without softening any of them.
 
 ---
 

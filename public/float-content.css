@@ -189,21 +189,31 @@
   #navbar { padding-right: 1.25rem; }
 }
 
-/* The opening statement of the whole document: what the argument is, and what
-   changed since it was published. It reads as ordinary body copy where it is
-   the frame for everything below it, so it gets a surface of its own. Built
-   from the theme's existing tokens, the same deep cream the active sidebar
-   link uses and the same hairline the tables use, so it belongs to the page
-   rather than announcing itself. */
-.float-intro {
-  margin: 0 0 36px;
-  padding: 22px 26px;
-  border: 1px solid var(--float-line-soft);
-  border-left: 3px solid var(--float-ink);
-  background: var(--float-cream-deep);
+/* Keep article emphasis and technical references on the plain page surface. */
+html body article :where(strong, b) {
+  font-weight: inherit;
 }
-.float-intro > :first-child { margin-top: 0; }
-.float-intro > :last-child { margin-bottom: 0; }
+html body article :where(em, i) {
+  font-style: normal;
+}
+html body article :where(mark, pre, :not(pre) > code, [data-callout-type]) {
+  background: transparent !important;
+  color: inherit !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+html body article :not(pre) > code {
+  padding: 0;
+}
+html body article :where(pre, blockquote, [data-callout-type]) {
+  padding: 0;
+  border: 0 !important;
+}
+html body article th {
+  background: transparent !important;
+  color: var(--float-ink) !important;
+}
 
 /* The page rail as a position, not a menu. The marker is a rule down the left
    edge that fills in on the section you are in, so the eye can find it without
