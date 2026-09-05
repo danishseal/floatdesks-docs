@@ -23,6 +23,12 @@ export async function proxyDocsPage(_request: Request, segments: string[]) {
       pages[pages.length - 1].markdown += `${line}\n`;
     }
   }
+  pages.splice(1, 0, {
+    title: "Announcing Float",
+    slug: "announcing-float",
+    group: "Overview",
+    markdown: await readFile(path.join(process.cwd(), "announcing-float.md"), "utf8"),
+  });
   const requested = segments.join("/");
   const index = pages.findIndex((page) => page.slug === (requested === "index" || requested === "index.html" ? "" : requested));
   if (index === -1) return new Response("Documentation page not found", { status: 404 });
