@@ -5,6 +5,42 @@ import { marked, Renderer } from "marked";
 const escape = (text: string) => text.replaceAll("&", "&amp;").replaceAll('"', "&quot;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
 const slugify = (text: string) => text.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 
+/**
+ * Verification marks.
+ *
+ * Three states, and the distinction is the whole point of them:
+ *   live   the claim was checked against chain state and holds today
+ *   built  the code is deployed, but nothing has exercised it with real value
+ *   todo   described here and not deployed, or deployed and known wrong
+ *
+ * "built" is not a softer "live". A mechanism can be flawless and hold nothing,
+ * which is exactly the state the reserve is in, and collapsing those two into
+ * one green mark would hide the only thing a reader needs to know.
+ *
+ * Marks are written in the markdown as {{live:...}} inline, or a whole-line
+ * {{status:live|note}} chip under a heading. Substitution happens on the
+ * markdown BEFORE marked sees it, so the marked text still parses as markdown
+ * and a mark can wrap bold, links or a whole sentence that wraps lines.
+ *
+ * Fenced code is excluded by splitting on fences and only substituting the odd
+ * chunks. Without that, a {{...}} appearing in a Solidity sample would be
+ * rewritten into HTML inside a <pre>, which is both wrong and invisible until
+ * someone reads that one code block.
+ */
+const MARK_LABEL: Record<string, string> = { live: "verified", built: "built, unexercised", todo: "outstanding" };
+export function annotate(markdown: string) {
+  const chunks = markdown.split(/(^```[\s\S]*?^```)/m);
+  return chunks.map((chunk, i) => {
+    if (i % 2) return chunk;
+    return chunk
+      .replace(/^\{\{status:(live|built|todo)\|([\s\S]*?)\}\}$/gm,
+        (_m, kind: string, note: string) =>
+          `<p class="fx-chip fx-chip--${kind}"><span class="fx-chip__dot"></span><span class="fx-chip__kind">${MARK_LABEL[kind]}</span><span class="fx-chip__note">${note.trim()}</span></p>`)
+      .replace(/\{\{(live|built|todo):([\s\S]*?)\}\}/g,
+        (_m, kind: string, body: string) => `<mark class="fx fx--${kind}">${body}</mark>`);
+  }).join("");
+}
+
 export async function proxyDocsPage(_request: Request, segments: string[]) {
   const source = await readFile(path.join(process.cwd(), "content/float.md"), "utf8");
   const pages: { title: string; slug: string; group: string; markdown: string }[] = [];
@@ -34,7 +70,7 @@ export async function proxyDocsPage(_request: Request, segments: string[]) {
     if (depth > 1) headings.push({ title: text, id });
     return `<h${depth} id="${id}">${this.parser.parseInline(tokens)}</h${depth}>`;
   };
-  const article = marked.parse(page.markdown, { renderer, async: false });
+  const article = marked.parse(annotate(page.markdown), { renderer, async: false });
   const groups = [...new Set(pages.map((entry) => entry.group))];
   const groupIcons = [
     '<circle cx="12" cy="12" r="8"/><path d="M12 7v6m0 3v1"/>',

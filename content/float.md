@@ -20,6 +20,26 @@ are worth stating before anything else.
 
 </div>
 
+<div class="fx-legend">
+
+**How to read the marks.** Every factual claim in this document was checked
+against Robinhood Chain 4663 on 2026-09-05, at block 55416922, and carries one
+of three marks. They are not three shades of the same thing.
+
+<dl>
+<dt>{{live:verified}}</dt>
+<dd>Checked against chain state on the date above, and true.</dd>
+<dt>{{built:built, unexercised}}</dt>
+<dd>The code is deployed and the mechanism works, but nothing has passed through it. Not a softer version of verified. The reserve is the case that matters: its contract is live, its ADR ratios are configured on chain, and it holds nothing at all.</dd>
+<dt>{{todo:outstanding}}</dt>
+<dd>Described here and not deployed, or deployed and now known to be wrong. This is the to-do list.</dd>
+</dl>
+
+Text with no mark is argument, background or explanation, and is not a claim
+about what is running. Section 14 is the full list of what is not true yet.
+
+</div>
+
 ### What Float is
 
 Float lists the companies the tokenization wave skipped. Of the world's top
@@ -32,17 +52,21 @@ market, and no consumer app is going to build that once per country.
 Float crosses that wall once, holds the shares on the other side, and issues a
 token against them.
 
-**One fSHARE is one ordinary share of the underlying company, held in custody
-and owed to the holder.** Not a basket, not a tracker, not an index: the
+{{todo:**One fSHARE is one ordinary share of the underlying company, held in custody
+and owed to the holder.**}} Not a basket, not a tracker, not an index: the
 specific security, in the specific quantity, in a specific account. The claim is
 redeemable, and selling an fSHARE back to the Desk burns it and releases the
-share behind it. It carries no voting rights, which is true of every tokenized
+share behind it.
+
+It carries no voting rights, which is true of every tokenized
 equity and is worth saying rather than implying.
+
+{{status:todo|No share has been bought. `ReserveBook.allReserves()` returns an empty array and `assetCount()` is 0, so not one market has ever been attested. This sentence is the product, and it is the thing still to do. Everything below describes the machine built to honour it.}}
 
 ### How it works
 
-**The Desk** is one vault of USDG standing on both sides of every listing. It
-quotes continuously against a reference price, which is what makes a Japanese
+{{built:**The Desk** is one vault of USDG standing on both sides of every listing. It
+quotes continuously against a reference price}}, which is what makes a Japanese
 company tradeable at three in the morning when Tokyo is shut and no pool exists
 to trade against:
 
@@ -51,22 +75,28 @@ buy  = mark * (1 + spread + impact + txFee)
 sell = mark * (1 - spread - impact - txFee)
 ```
 
-The spread is 30 basis points while the home exchange is open and 200 when it is
-closed. That widening is retained by the vault in full, and it is what pays for
-quoting a company whose own exchange is shut. Impact scales with how far a trade
+{{live:The spread is 30 basis points while the home exchange is open and 200 when it is
+closed.}} That widening is retained by the vault in full, and it is what pays for
+quoting a company whose own exchange is shut.
+
+Impact scales with how far a trade
 pushes the book away from balance, so size pays for the risk it creates.
 
-**The reserve** is five public numbers on `ReserveBook.sol`: what is
+{{status:built|The Desk is deployed at `0x09E2643442ce37cBf3Fea57309657e42F82439C9`, and `baseSpreadBps` 30 / `ahSpreadBps` 200 reads back on 37 of the 40 listings. Nothing is quoting today: 36 markets are Halted and 4 are SettleOnly, none Live. For the genesis 36 that is the designed birth state, not a fault (see 13, "Read the reserve, not the status"): a curve-funded market is born Halted and goes Live on its first buy.}}
+
+{{built:**The reserve** is five public numbers on `ReserveBook.sol`}}: what is
 outstanding, what custody actually holds, what has been ordered and paid for but
 not yet settled, and the ceilings those imply. Nothing about the backing exists
 off chain except the broker account itself. A market that cannot prove its cover
 becomes settle-only, which is the universal failure state here: existing
 positions can be closed, nothing new can be issued.
 
-**The launch** funds the custody purchase from the first dollar rather than
+**The launch** {{todo:funds the custody purchase}} from the first dollar rather than
 waiting at a milestone, thickening the market with every dollar after on a
-decaying ramp. A launched token graduates into two real Uniswap v4 pools, USDG
-to fSHARE to token, with 23.4% of supply seeded into the pool.
+decaying ramp. {{live:A launched token graduates into two real Uniswap v4 pools, USDG
+to fSHARE to token, with 23.4% of supply seeded into the pool.}}
+
+{{status:live|Five launches have run end to end across the two CurveFunder deployments, three on the superseded `0xD55E56Be` and two on the current `0xf7Dee182`, with eight Uniswap v4 pools carrying real two-sided liquidity. The curve, the graduation and the pools all work. The one step that has never happened is the custody purchase the raised USDG is for.}}
 
 ### What an ADR is
 
@@ -109,7 +139,7 @@ on-chain view agrees with itself, because every view is derived from the same
 wrong constant.
 
 We learned it the expensive way. A published fact sheet gave the NTDOY ratio as
-1:8. Float derived it from live prices instead and got 1:0.25, a 32x
+1:8. {{live:Float derived it from live prices instead and got 1:0.25}}, a 32x
 discrepancy against the document, and the live price relationship was the
 correct one. So the rule is explicit: **verify a ratio from prices, never from a
 fact sheet, and check it continuously**, because a depositary can change the
@@ -124,10 +154,12 @@ setCustodyUnit(assetId, sharesPerUnit, kind)   // 1e18 = one unit is one ordinar
 sharesHeld = unitsHeld * sharesPerUnit / 1e18
 ```
 
-`custodyKind` is stored as a string, "ordinary" or "ADR" or "GDR", so the
+{{live:`custodyKind` is stored as a string}}, "ordinary" or "ADR" or "GDR", so the
 reserve page says plainly what is held rather than implying the ordinary share
 everywhere. A ratio change restates the existing position, so the book never
 keeps crediting an old conversion against shares it already holds.
+
+{{status:live|The ratio machinery is deployed and configured, not just written. On the live ReserveBook, `sharesPerUnit(NINTENDO)` reads 2.5e17, which is the 0.25 in the table above, and `custodyKind(NINTENDO)` reads "ADR NTDOY 1:0.25". This is the part of section 6 that is real today. What it converts is still zero.}}
 
 Section 5 is the full mechanical account of how one token becomes one share, and
 section 6 is the whole of the ratio problem.
@@ -138,16 +170,18 @@ section 6 is the whole of the ratio problem.
 |---|---|---|
 | **opening a market** | waits at $5,000, then opens | opens on the first dollar and thickens with every one after, on a decaying ramp |
 | **the launchpad token** | priced and settled in the fSHARE | same, and it now graduates into two real Uniswap v4 pools, USDG to fSHARE to token, with 23.4% of supply into the pool |
-| **becoming spot** | a $10,000 milestone flips fSAMSUNG to SAMSUNG | **pairing.** The market stops depending on cash the moment custody covers supply with headroom. The milestone was a guess at when that happens; pairing measures it |
-| **liquidity** | provided by the protocol | a two-sided market. Anyone can take the long or the short side of a market's capacity and earn its fee slice |
-| **the reserve** | a custodian attests | two custody modes, attested and verified, and a verified market refuses attestation outright |
+| **becoming spot** | a $10,000 milestone flips fSAMSUNG to SAMSUNG | {{todo:**pairing.** The market stops depending on cash the moment custody covers supply with headroom.}} The milestone was a guess at when that happens; pairing measures it |
+| **liquidity** | provided by the protocol | {{built:a two-sided market. Anyone can take the long or the short side of a market's capacity and earn its fee slice}} |
+| **the reserve** | a custodian attests | {{live:two custody modes, attested and verified, and a verified market refuses attestation outright}} |
 | **failure** | unspecified | settle-only is the universal failure state, and a breaker puts a market there in one call |
 
-Everything else the essay promised is here and is the same: one real share per
-token, held in custody, proven on chain; a dealer quoting continuously against a
-live reference so the token trades around the clock; no Korean account, no FX
+Everything else the essay promised is built and is the same: {{todo:one real share per
+token, held in custody, proven on chain}}; {{built:a dealer quoting continuously against a
+live reference so the token trades around the clock}}; no Korean account, no FX
 leg, no treaty forms, no index classification standing between a person and a
 company.
+
+{{status:todo|Of the six rows above, `spot=false` on all 40 listings, so no market has ever paired. The essay's promise is built end to end and has not yet been filled.}}
 
 Section 5 is the important one. It is the full mechanical account of how one
 token comes to be one share, and section 6 explains ADRs, because the ratio
@@ -159,6 +193,8 @@ genuinely difficult.
 # Part I: The problem
 
 ## 1. The gap is the head, not the tail
+
+{{status:live|Part I is the argument, not the machine, so it carries market research rather than chain state. The figures here (1,880 of the top 2,000 untokenized, tokenization stopping at 193 names) come from the research sets in `data/` and were not re-derived in this pass. They are marked as argument, not as verified chain facts.}}
 
 Robinhood Chain carries 193 tokenized stocks. The world's top 2,000 public
 companies include 1,880 that are not among them. The missing set is not the long
@@ -173,6 +209,8 @@ Cultural diets went global decades ago. Portfolios stayed national. That gap is
 not a demand problem.
 
 ## 2. The wall
+
+{{status:live|Argument, not chain state. The mechanics described here (foreign accounts, FX legs, treaty paperwork, home-market custodians) are the reason Float exists and are not claims about what is deployed.}}
 
 Try to buy Samsung or SK Hynix from the US and you hit a stack of barriers that
 has nothing to do with the company and everything to do with the market it lives
@@ -200,6 +238,8 @@ sits in between, and the plumbing always wins.
 
 ## 3. Why tokenization stopped at 193
 
+{{status:live|Argument, from the research sets in `data/`. The 193 figure and the coverage counts were not re-derived against a live source in this pass, so treat them as the thesis rather than as verified chain facts.}}
+
 Tokenized stocks were supposed to be the answer, and Robinhood Chain proved the
 model: real shares, held one for one by a regulated custodian, issued as tokens.
 
@@ -214,6 +254,8 @@ never the wrong model. It had simply never been carried across the wall, to
 exactly the companies that live behind the most plumbing.
 
 ## 4. What Float removes
+
+{{status:built|What this chapter promises is built and mostly unexercised. The plumbing it removes is genuinely removed in code, and no user has yet gone through it end to end, because no market carries third-party volume.}}
 
 Float lists them by doing the crossing once, so nobody else has to.
 
@@ -253,14 +295,16 @@ is there to be checked. Section 5 is how.
 
 ## 5. How one token becomes one share, exactly
 
+{{status:todo|Read this whole section as a specification, not a description. The contract is deployed and every view below answers, but the reserve is empty: `assetCount()` is 0, `allReserves()` returns `[]`, and no market has ever been attested. NINTENDO is the one market with fSHARE actually in issue, and it reads `outstanding` 4.286e17 against `sharesHeld` 0, so `coverageBps` is 0 and `isFullyReserved` is false. That is a real, live shortfall today, not a hypothetical.}}
+
 This is the section that matters. Everything else Float does is a way of
 delivering the claim described here, and every design decision elsewhere bends
 to keep it true.
 
 ### 5.1 The claim, stated precisely
 
-**One fSHARE is one ordinary share of the underlying company, held in custody
-and owed to the holder.**
+{{todo:**One fSHARE is one ordinary share of the underlying company, held in custody
+and owed to the holder.**}}
 
 Not one share of a basket. Not a tracker. Not an index. The specific security,
 in the specific quantity, in a specific account. Where custody holds a receipt
@@ -276,9 +320,11 @@ stated rather than implied.
 
 ### 5.2 The five numbers
 
-Every market's reserve is five numbers, all of them public views on
-`ReserveBook.sol`. Nothing about the backing exists off chain except the broker
+{{live:Every market's reserve is five numbers, all of them public views on
+`ReserveBook.sol`.}} Nothing about the backing exists off chain except the broker
 account itself, and section 5.8 is about what that means.
+
+{{status:built|All five views answer on the live contract, and for NINTENDO they read `outstanding` 4.286e17, `sharesHeld` 0, `inFlightLive` 0, `bufferShares` 0, `coverageBps` 0. One naming correction: there is no `cashBackedShares(assetId)`. The deployed view is `cashBackedSharesAt(assetId, px, qScale)`, which needs a price and a quote scale because the cash converts at a price.}}
 
 | number | what it is | how to read it |
 |---|---|---|
@@ -286,7 +332,7 @@ account itself, and section 5.8 is about what that means.
 | `sharesHeld` | ordinary-share equivalents settled in custody | attested by the custodian, or read as a token balance |
 | `inFlightLive` | ordered and paid for, not yet settled, with a live TTL | expires after 3 days so a stuck order cannot prop up a ceiling |
 | `bufferShares` | a deliberate over-hold, absorbing the settlement gap | set per market, publicly |
-| `cashBackedShares` | tokens covered by cash committed to buying their share | falls to zero as custody converts, by construction |
+| `cashBackedSharesAt` | tokens covered by cash committed to buying their share | falls to zero as custody converts, by construction. Takes `(assetId, px, qScale)`, not the assetId alone |
 
 And one derived number that is the whole product in a single call:
 
@@ -296,6 +342,8 @@ coverageBps = sharesHeld * 10000 / outstanding
 
 10000 means exactly one share per token. More is over-reserved. Less is a
 shortfall, and it is visible to anyone the moment it happens.
+
+{{status:live|This one is doing its job right now, which is the point of it. `coverageBps(NINTENDO)` returns 0 against 0.4286 fSHARE in issue, and `isFullyReserved` returns false. The number does not flatter the state it is reporting.}}
 
 ### 5.3 The buy, step by step
 
@@ -584,6 +632,8 @@ a single current figure proves less than a series does:
 
 ## 6. ADRs, ratios, and what custody actually holds
 
+{{status:live|The mechanism in this chapter is deployed and configured, which makes it the strongest part of Part II. On the live ReserveBook, `sharesPerUnit(NINTENDO)` is 2.5e17 and `custodyKind(NINTENDO)` is "ADR NTDOY 1:0.25", so the ratio layer is real, not planned. What it has never done is convert a real position: `unitsInCustody` is 0 everywhere. 6.5, on providers, is the outstanding half.}}
+
 The promise is one token, one ordinary share. The thing sitting in a US
 brokerage account is frequently not an ordinary share, and pretending otherwise
 is how a reserve quietly becomes fractional. This section is the whole of that
@@ -740,6 +790,8 @@ between them.
 
 ### 6.5 Who holds it, and who prices it
 
+{{status:todo|The price half of this section is live and verified (see 8.2). The custody half is not: no brokerage account is funded, so no attestor has ever posted a position. `services/attestor` and the alpaca, ibkr and dinari adapters are written, and the Dinari one is prototyped and undeployed as the text says. Naming a provider here is not the same as having an account with one.}}
+
 Three different counterparties sit behind an ADR-backed market, and they fail in
 different ways, so they are worth naming separately.
 
@@ -846,6 +898,8 @@ while that pipe is being built.
 
 ## 7. The Desk
 
+{{status:built|Deployed at `0x09E2643442ce37cBf3Fea57309657e42F82439C9` with every parameter below reading back as documented. It has quoted and filled on the test lines, and no genesis market is Live for it to quote into today. Its `reserveValue()` term reads 0, which section 13 explains is the term that moves first when a brokerage account is funded.}}
+
 `contracts/src/Desk.sol`. One vault of USDG standing on both sides of every
 listing Float quotes. It is what makes the token tradeable when the home
 exchange is shut and the pool is empty.
@@ -913,6 +967,8 @@ parameter discipline rather than a guarantee.
 
 ## 8. Price, and the 24/7 mark
 
+{{status:live|The most thoroughly true chapter here. The hub is live at `0x11BeB700b526b0487382071A7910dF81a4cE658c`, `posterCount` is 3, `minPosters` is 1, `MAX_POSTERS` is 15, and all three poster addresses in 8.2 match `posterList` on chain exactly. One number below had gone stale and is corrected in place: `posterFreshWindow`.}}
+
 Every market in Float prices off one reference, and everything else bends
 around it. This is where it comes from, who supplies it, and what happens when
 they stop.
@@ -920,9 +976,11 @@ they stop.
 ### 8.1 The hub
 
 `contracts/src/OracleHubMedian.sol`. Posters submit a price, a timestamp and a
-`marketOpen` flag per asset. `getQuote` takes the **median of the submissions
-that are still fresh**, where fresh means within `posterFreshWindow`, 21600
-seconds today, and up to `MAX_POSTERS` of 15 may be registered.
+`marketOpen` flag per asset. {{live:`getQuote` takes the **median of the submissions
+that are still fresh**, where fresh means within `posterFreshWindow`, 12600
+seconds today, and up to `MAX_POSTERS` of 15 may be registered.}}
+
+{{status:live|Corrected 2026-09-05: this said 21600, which was the value that caused the NINTENDO settle-only incident. A submission stayed inside `posterFreshWindow` (21600) while already exceeding the Desk's `maxStaleness` (14400), so it counted toward the median and was simultaneously too old for the Desk to trade on. The window is now 12600, which is under `maxStaleness` by 1800 seconds, and the band is closed. Read back off the hub just now.}}
 
 Two details of the median matter more than the median itself.
 
@@ -944,7 +1002,7 @@ settle-only. Exits keep working and nothing new opens. An asset that has never
 been posted at all reverts `NeverPosted` rather than returning a zero anyone
 could mistake for a price.
 
-`minPosters` is 1 today, deliberately. Three posters are registered but only two
+{{live:`minPosters` is 1 today, deliberately. Three posters are registered}} but only two
 carry all thirty-six, so a quorum of two would still mean either of those two
 going down puts every market into settle-only. It is raised when a third poster
 covers the full set, not merely when a third address exists.
@@ -960,6 +1018,8 @@ move the mark on its own. The third posts a single asset.
 | val1 | **EODHD**, paid, All World Extended | all 36 | `0xE7BaDD2e...41eE6` |
 | val2 | **Yahoo** | all 36 | `0x4c40771B...29D05` |
 | the deploy key | its own feed | NINTENDO only | `0x4C9fE79E...9061` |
+
+{{status:live|All three verified against `posterList` on the live hub: `0x4c40771B34e636f6096102eC1D94Da43Cf929D05`, `0xE7BaDD2ea3aF655EaA8c1cfDa11135a6C8341eE6`, `0x4C9fE79EcA3B34b95944449EF126fAd3fe5a9061`. The third being the deploy key is item 2 of section 14: the same key owns the protocol and posts a price.}}
 
 That third one is worth knowing about rather than rounding to "three posters",
 because it is the median timestamp above made concrete. Read just now, NINTENDO
@@ -1029,6 +1089,8 @@ underlying is not trading: flow moves it, and the movement is bounded by how
 wrong the market is willing to let it be.
 
 ## 9. The launch: a meme funds a stock
+
+{{status:live|The most exercised chapter here. Five launches have run end to end across the two CurveFunder deployments, with eight Uniswap v4 pools carrying real two-sided liquidity, and every parameter reads back on chain: `feeBps` 100, `virtualBps` 4000, `creatorShareBps` 5000, `vaultShareBps` 5000, `gradMultiplierBps` 6000. The curve, the split, graduation and pool seeding all work with real money. The step this chapter exists to fund, the custody purchase, has never happened.}}
 
 `CurveFunder.sol`, `Graduator.sol`, `RangeSeeder.sol`.
 
@@ -1162,6 +1224,8 @@ it.
 
 ## 10. Liquidity as a market
 
+{{status:built|Built and exercised end to end, but only by the deployer. Section 14 item 3 is the honest version: nobody outside has taken either side of the cap market. `BackingVault.totalCash` reads 0, which is also what keeps the cap-formula bug in item 5 latent, so this chapter describes a working mechanism holding nothing and carrying a known defect that no current state can reach.}}
+
 A market's capacity to issue is `oiCap = backing * capMultiplierBps / 10000`.
 Historically only the protocol could add to that backing, which made liquidity
 something Float provided rather than something anyone could take a position in.
@@ -1213,6 +1277,8 @@ cap falling to $101,000 after one $5 buy. Both now use one expression,
 half stored explicitly so a recompute reproduces the opening value exactly.
 
 ## 11. Fees
+
+{{status:live|Every rate in the grid below was read off the live contracts on 2026-09-05 and matches: `feeBps` 100, `baseSpreadBps` 30, `ahSpreadBps` 200, `maxImpactBps` 200, `txFeeBps` 40, `protocolFeeBps` 0, `stakerFeeBps` 10, `launcherFeeBps` 10. The one thing the grid cannot show is that `txFeeBps` is paid away to an address that is not a contract: `FEE_ROUTER` resolves to the deploy key, so the 0.4% currently lands on an EOA rather than on holders and the launch queue. That is section 14 item 7.}}
 
 Every fee in the system, in one place. Rates are the deployed values.
 
@@ -1277,6 +1343,8 @@ deployer key and the `FeeRouter` that would push the protocol's share into the
 launch queue is written and not deployed. The flywheel is built and not turning.
 
 ## 12. Risk
+
+{{status:built|The controls are deployed: the Breaker is at `0x17a17f81d3FB38386d827DB5052CEF72a3022536` and settle-only is reachable in one call. What this chapter cannot claim is that they have been exercised under load, because no market has carried third-party volume. Note also that the `fNTDO` test lines carry `maxStaleness` of ten years, which disarms the staleness trip on those lines specifically.}}
 
 ### Coverage
 
@@ -1350,6 +1418,8 @@ orphans every live fSHARE.
 Robinhood Chain 4663. One key owns all of it, which is acceptable for a run of
 this size and must not survive past it.
 
+{{status:live|Every address in this table was checked for code on 2026-09-05 at block 55416922, and all sixteen carry it, USDG and the v4 PoolManager included. A registered address with no code behind it is the failure this table exists to rule out, so it was checked rather than assumed.}}
+
 | | |
 |---|---|
 | Registry | `0x7134d98596490838FC16e8CA16bC2FDd57aD3202` |
@@ -1371,9 +1441,11 @@ External: USDG `0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168`, v4 PoolManager
 `0x8366a39CC670B4001A1121B8F6A443A643e40951`.
 Owner and deployer: `0x4C9fE79EcA3B34b95944449EF126fAd3fe5a9061`.
 
-Four launches have run end to end, each a meme quoted in the fSHARE it settles
-in, with eight Uniswap v4 pools carrying real two-sided liquidity. The most
-recent graduated with zero burn and 23.3% of supply into its pool.
+{{live:Five launches have run end to end, each a meme quoted in the fSHARE it settles
+in}}, with eight Uniswap v4 pools carrying real two-sided liquidity. The most
+recent graduated with zero burn and 23.4% of supply into its pool.
+
+{{status:live|Corrected 2026-09-05: this said four. `tokenCount()` reads 3 on the superseded CurveFunder `0xD55E56BeaC9527Ace861a788BaAE82e5347c6495` and 2 on the current `0xf7Dee182D0D559597F1F1DEF587466cCA24eADB6`, so five. Enumerating only the registered launcher is what undercounts, and it is the same trap the launchpad hit: no registry key points at the old one. The supply figure said 23.3% here and 23.4% in the introduction; 23.4% is the one used throughout.}}
 
 ### The genesis set
 
@@ -1526,9 +1598,13 @@ rather than a change of plan. Read the reserve, not the status.
 
 285 unit and integration tests, plus fork tests against live chain state.
 
+{{status:live|Spot-checked against chain on 2026-09-05: `txFeeBps` 40, protocol 0, staker 10, launcher 10, and spread 30 / 200 on 37 of 40 listings. The three exceptions are the `fNTDO` test lines, which carry `ahSpreadBps` 150 and a `maxStaleness` of 315,360,000 seconds, ten years, which disarms the settle-only staleness trip on those lines specifically. They are test lines, not markets, but the parameter table above does not hold for them.}}
+
 ## 14. What is not true yet
 
 No softening. This is the list.
+
+{{status:todo|Every item re-checked against chain on 2026-09-05. Ten of the twelve still hold. Item 2 was stale and is corrected below, and item 9 gained a note. Verified this pass: `Desk.reserveValue()` 0, `ReserveBook.assetCount()` 0, `allReserves()` empty, `FEE_ROUTER` resolving to an EOA with no code, `Desk.withdrawDelay()` 0, `DESK_HOOK` unset, and `BackingVault.totalCash` 0, which is what keeps item 5 latent.}}
 
 1. **No real share has been bought.** `sharesHeld` is zero on every market,
    `reserveValue` is $0, and no market is currently gated. Section 5 describes a
@@ -1538,8 +1614,11 @@ No softening. This is the list.
    oracle poster and the ReserveBook custodian. Fine for a run of this size,
    unacceptable past it. The oracle half of this is now one step less bad: the
    median hub is deployed and live, so a second and third poster can be added
-   without touching any other contract. Until they are, `posterCount` is 1 and
-   a median over one poster is that poster.
+   without touching any other contract. {{live:They have been: `posterCount` now
+   reads 3.}} But `minPosters` is still 1, so the hub will accept a median over a
+   single submission whenever the others go stale, and a median over one poster
+   is that poster. Section 8.1 explains why raising it waits on a third poster
+   covering the whole set rather than on a third address existing.
 3. **Nobody outside has taken either side of the cap market.** The mechanism
    works and has been exercised end to end with real money, by the deployer.
 4. **Backers are pari passu with the global LP**, and their directional exposure
@@ -1557,7 +1636,10 @@ No softening. This is the list.
    only live exit friction is the cap gate and the 3-day unstake delay.
 9. **Quote-pool depth is a band, not a hook.** Roughly plus or minus 2%, and a
    larger trade walks out of it. DeskHook is the permanent answer and is on
-   another branch.
+   another branch. {{todo:`Registry.addrs("DESK_HOOK")` is the zero address.}} It is
+   built, linked and size-fixed at 23,841 bytes against the 24,576 limit, and it
+   is blocked on gas rather than on code: the deploy needs about 0.0044 ETH and
+   the owner key holds less.
 10. **`_impactBps` has no zero guard.** A zero cap is a division panic rather
     than a named revert. Four separate writers each floor the cap
     independently, so nothing reaches it today, but the invariant is defended
@@ -1572,6 +1654,8 @@ No softening. This is the list.
 ---
 
 ## Reading order for the code
+
+{{status:todo|Checked 2026-09-05 and the table needs a caveat. Six of these fourteen paths do not exist on `main`: `CurveFunder.sol`, `Graduator.sol`, `RangeSeeder.sol`, `BackingVault.sol`, `DeployCurve.s.sol` and `services/keepers/reserve-keeper.mjs` live only on the `curve-funder` branch. Worse for a reader starting here, `ReserveBook.sol` exists on `main` but is the OLD one, without `setCustodyUnit`, `sharesPerUnit`, `custodyKind` or the verified-custody mode, so it does not match the contract actually deployed at `0x3A4c63B1`. Read these on `curve-funder`, not on `main`.}}
 
 | you want | read |
 |---|---|

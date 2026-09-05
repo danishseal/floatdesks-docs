@@ -294,3 +294,79 @@
 .grid-wide table { font-size: 12px; }
 .grid-wide td:nth-child(5),
 .grid-wide td:nth-child(6) { white-space: nowrap; }
+
+/* ---------------------------------------------------------------------------
+   Verification marks.
+
+   Three states, and the middle one carries the weight: "built" means the code
+   is deployed and the mechanism works, but nothing has passed through it. The
+   reserve is the case that matters. Its contract is live, its ADR ratios are
+   configured on chain, and it holds nothing at all. Painting that the same
+   green as a checked fact would hide the single most important thing on the
+   page, so it gets its own colour and its own word.
+
+   Colours are picked against the cream ground rather than the usual green/red
+   on white: on #eee9dd a saturated red vibrates and a light green disappears,
+   so both are darkened and desaturated until the text on them stays legible.
+   Every mark also carries a left rule, because colour alone is not a label. */
+.fx {
+  background: none;
+  color: inherit;
+  padding: 0 0.12em;
+  border-radius: 2px;
+  /* Deliberately NOT box-decoration-break: clone. With clone, a mark spanning
+     three lines draws its left rule three times, once per line fragment, and
+     the rule stops reading as "the mark starts here" and starts reading as
+     noise down the paragraph. Sliced, the background still paints on every
+     fragment but the rule is drawn once, at the start, which is what it is
+     for. */
+}
+.fx--live  { background: rgb(47 107 63 / 15%); box-shadow: inset 2px 0 0 #2f6b3f; }
+.fx--built { background: rgb(154 106 0 / 16%);  box-shadow: inset 2px 0 0 #9a6a00; }
+.fx--todo  { background: rgb(155 44 44 / 14%);  box-shadow: inset 2px 0 0 #9b2c2c; }
+
+/* The chip sits under a heading and states the section's status once, so the
+   inline marks inside it only have to carry the exceptions. */
+.fx-chip {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 10px 0 18px;
+  padding: 7px 11px;
+  border: 1px solid var(--float-line-soft);
+  border-left-width: 3px;
+  border-radius: 3px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  background: rgb(255 255 255 / 30%);
+}
+.fx-chip__dot { width: 7px; height: 7px; border-radius: 50%; flex: none; transform: translateY(-1px); }
+.fx-chip__kind {
+  flex: none;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-size: 10.5px;
+}
+.fx-chip__note { color: var(--float-ink-muted); }
+.fx-chip--live  { border-left-color: #2f6b3f; }
+.fx-chip--built { border-left-color: #9a6a00; }
+.fx-chip--todo  { border-left-color: #9b2c2c; }
+.fx-chip--live  .fx-chip__dot,
+.fx-chip--live  .fx-chip__kind { background: none; color: #2f6b3f; }
+.fx-chip--built .fx-chip__kind { color: #9a6a00; }
+.fx-chip--todo  .fx-chip__kind { color: #9b2c2c; }
+.fx-chip--live  .fx-chip__dot { background: #2f6b3f; }
+.fx-chip--built .fx-chip__dot { background: #9a6a00; }
+.fx-chip--todo  .fx-chip__dot { background: #9b2c2c; }
+
+/* The legend, which is the key to every mark on every page. */
+.fx-legend { margin: 22px 0 6px; padding: 16px 18px; border: 1px solid var(--float-line-soft); border-radius: 4px; background: rgb(255 255 255 / 34%); }
+.fx-legend p { margin: 0 0 10px; font-size: 13px; }
+.fx-legend dl { display: grid; grid-template-columns: auto 1fr; gap: 7px 14px; margin: 0; font-size: 13px; }
+.fx-legend dt { margin: 0; }
+.fx-legend dd { margin: 0; color: var(--float-ink-muted); }
+/* The closing "unmarked text is argument" line sits after the <dl> and was
+   butting straight up against the last definition, reading as part of it. */
+.fx-legend p:last-child { margin: 14px 0 0; }
+.fx-legend dd + dt { margin-top: 2px; }
