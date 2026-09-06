@@ -111,7 +111,7 @@ function applyFloatTheme(
 
   doc.documentElement.dataset.floatInitialized = "true";
   frame.dataset.ready = "true";
-  document.title = doc.title;
+  document.title = "FLOAT";
 
   if (!doc.documentElement.dataset.localNavigation) {
     doc.documentElement.dataset.localNavigation = "true";
@@ -151,7 +151,7 @@ function applyFloatTheme(
         }
 
         if (pushHistory) frame.contentWindow?.history.pushState({}, "", getMirrorUrl(url.pathname, url.hash));
-        document.title = nextDoc.title;
+        document.title = "FLOAT";
         doc.querySelector<HTMLDetailsElement>(".mobile-navigation")?.removeAttribute("open");
         if (url.hash) {
           scrollToHeading(doc, decodeURIComponent(url.hash.slice(1)));

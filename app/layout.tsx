@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Float Docs",
-  icons: { icon: { url: "/sailboat-white-300_1_1.png", type: "image/png" } },
-  description: "Float 2.0 documentation: backing, custody, markets, liquidity, fees, and risk.",
+  title: "FLOAT",
+  applicationName: "FLOAT",
+  icons: { icon: { url: "/float-favicon.png", type: "image/png" } },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
